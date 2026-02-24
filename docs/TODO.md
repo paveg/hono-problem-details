@@ -36,7 +36,7 @@
   - permissions: contents/pull-requests/id-token write
   - changesets/action@v1 for auto release PR creation + npm publish
   - secrets: GITHUB_TOKEN, NPM_TOKEN
-- [ ] GitHub branch ruleset — require ci-pass on main branch
+- [x] GitHub branch ruleset — require ci-pass on main branch + PR required
 
 ### 1.3 Coverage Target
 
