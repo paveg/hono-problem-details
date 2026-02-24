@@ -5,7 +5,8 @@
 		".": "./src/index.ts",
 		"./zod": "./src/integrations/zod.ts",
 		"./valibot": "./src/integrations/valibot.ts",
-		"./openapi": "./src/integrations/openapi.ts"
+		"./openapi": "./src/integrations/openapi.ts",
+		"./standard-schema": "./src/integrations/standard-schema.ts"
 	},
 	"publish": {
 		"include": ["src", "LICENSE", "README.md", "jsr.json"]
