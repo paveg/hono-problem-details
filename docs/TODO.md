@@ -120,8 +120,8 @@
 
 ### 4.3 Existing Library Integration
 
-- [ ] PR to migrate hono-idempotency errors.ts to hono-problem-details
-- [ ] PR to migrate hono-webhook-verify errors.ts to hono-problem-details
+- [x] PR to migrate hono-idempotency errors.ts to hono-problem-details ([#72](https://github.com/paveg/hono-idempotency/pull/72))
+- [x] PR to migrate hono-webhook-verify errors.ts to hono-problem-details ([#76](https://github.com/paveg/hono-webhook-verify/pull/76))
 
 #### Current State
 
