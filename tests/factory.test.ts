@@ -65,4 +65,40 @@ describe("problemDetails factory", () => {
 		const error = problemDetails({ status: 999 });
 		expect(error.problemDetails.title).toBe("Unknown Error");
 	});
+
+	it("F7: standard fields take precedence over colliding extension keys", async () => {
+		const error = problemDetails({
+			status: 422,
+			type: "https://example.com/validation",
+			title: "Validation Error",
+			extensions: { status: 200, type: "evil", title: "Fake" },
+		});
+		const response = error.getResponse();
+		const body = await response.json();
+		expect(body.status).toBe(422);
+		expect(body.type).toBe("https://example.com/validation");
+		expect(body.title).toBe("Validation Error");
+		expect(response.status).toBe(422);
+	});
+
+	it("F8: error.message is detail when detail is provided", () => {
+		const error = problemDetails({ status: 404, detail: "User 123 not found" });
+		expect(error.message).toBe("User 123 not found");
+	});
+
+	it("F9: error.message is title when detail is omitted", () => {
+		const error = problemDetails({ status: 404 });
+		expect(error.message).toBe("Not Found");
+	});
+
+	it("F10: prototype-like extension keys are inert", async () => {
+		const error = problemDetails({
+			status: 400,
+			extensions: { __proto__: { polluted: true }, constructor: "bad" },
+		});
+		const response = error.getResponse();
+		const body = await response.json();
+		expect(body.status).toBe(400);
+		expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+	});
 });

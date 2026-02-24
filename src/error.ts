@@ -26,7 +26,7 @@ export class ProblemDetailsError extends Error {
 
 	getResponse(): Response {
 		const { extensions, ...standard } = this.problemDetails;
-		const body = { ...standard, ...extensions };
+		const body = { ...extensions, ...standard };
 		return new Response(JSON.stringify(body), {
 			status: this.problemDetails.status,
 			headers: { "Content-Type": "application/problem+json" },

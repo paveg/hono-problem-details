@@ -97,6 +97,23 @@ describe("zodProblemHook", () => {
 		expect(error).toHaveProperty("code");
 	});
 
+	it("Z8: handles root-level validation error (empty path)", async () => {
+		const app = new Hono();
+		const schema = z.string().min(1);
+		app.post("/name", zValidator("json", schema, zodProblemHook()), (c) => {
+			return c.json({ ok: true });
+		});
+		const res = await app.request("/name", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(""),
+		});
+		expect(res.status).toBe(422);
+		const body = await res.json();
+		expect(body.errors).toHaveLength(1);
+		expect(body.errors[0].field).toBe("");
+	});
+
 	it("Z7: allows custom title and detail via options", async () => {
 		const app = createApp({
 			title: "Custom Validation Error",
