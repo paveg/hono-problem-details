@@ -61,7 +61,17 @@
 		"release": "pnpm build && changeset publish",
 		"version-packages": "changeset version && pnpm lint:fix"
 	},
-	"keywords": ["hono", "rfc9457", "problem-details", "error-handling", "middleware", "api"],
+	"keywords": [
+		"hono",
+		"rfc9457",
+		"problem-details",
+		"error-handling",
+		"middleware",
+		"api",
+		"openapi",
+		"zod",
+		"valibot"
+	],
 	"license": "MIT",
 	"peerDependencies": {
 		"hono": ">=4.0.0"
