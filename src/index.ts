@@ -3,3 +3,4 @@ export type {
 	ProblemDetailsHandlerOptions,
 	ProblemDetailsInput,
 } from "./types.js";
+export { statusToPhrase, statusToSlug } from "./status.js";
