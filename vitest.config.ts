@@ -5,7 +5,7 @@ export default defineConfig({
 		coverage: {
 			provider: "v8",
 			include: ["src/**/*.ts"],
-			exclude: ["src/index.ts", "src/types.ts", "src/integrations/valibot.ts"],
+			exclude: ["src/index.ts", "src/types.ts"],
 			thresholds: {
 				statements: 100,
 				branches: 100,
