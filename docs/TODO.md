@@ -51,7 +51,7 @@
 ### 1.4 Type Definitions
 
 - [x] `src/types.ts` — ProblemDetails, ProblemDetailsInput, ProblemDetailsHandlerOptions
-- [ ] Tests: type inference verification (tsd or vitest type tests)
+- [x] Tests (14 tests): type inference verification via vitest expectTypeOf
 
 ### 1.5 Status Code Mapping
 
@@ -121,6 +121,87 @@
 
 - [ ] PR to migrate hono-idempotency errors.ts to hono-problem-details
 - [ ] PR to migrate hono-webhook-verify errors.ts to hono-problem-details
+
+#### Current State
+
+Both libraries do essentially the same thing in their `errors.ts`:
+
+- `hono-idempotency/src/errors.ts` — returns RFC 9457 JSON directly as Response
+- `hono-webhook-verify/src/errors.ts` — returns RFC 9457 JSON directly as Response
+
+Conceptually identical code in each:
+
+```ts
+return c.json({
+  type: "https://hono-xxx.dev/errors/conflict",
+  status: 409,
+  title: "...",
+  detail: "..."
+}, 409, { 'Content-Type': 'application/problem+json' })
+```
+
+#### Integration Pattern: Two Options
+
+**Option A: throw + app.onError pattern**
+
+```ts
+// hono-idempotency middleware.ts
+import { problemDetails } from 'hono-problem-details'
+
+throw problemDetails({ status: 409, title: '...', type: '...' })
+// → app.onError(problemDetailsHandler()) catches and returns
+```
+
+Problem: requires user to set up `app.onError(problemDetailsHandler())`. Degrades standalone usability of hono-idempotency.
+
+**Option B: getResponse() direct return (recommended)**
+
+```ts
+// hono-idempotency middleware.ts
+import { problemDetails } from 'hono-problem-details'
+
+const error = problemDetails({ status: 409, title: '...', type: '...' })
+return error.getResponse()
+// → works without problemDetailsHandler()
+```
+
+This is correct. Call `getResponse()` inside middleware to return directly. No dependency on `app.onError`.
+
+#### Trade-off Analysis
+
+| Aspect | Adopt hono-problem-details | Keep current (no change) |
+|--------|---------------------------|--------------------------|
+| Dependencies | hono + hono-problem-details | hono only |
+| Code size | errors.ts ~5 lines | errors.ts ~30 lines |
+| Consistency | Unified across 3 libraries | May diverge slightly |
+| Content-Type | Guaranteed `application/problem+json` | Manual per-library (risk of omission) |
+| Version coupling | Breaking changes in hono-problem-details propagate | Independent |
+| User overhead | `npm i hono-problem-details` as transitive dep | None |
+
+#### Recommended Approach: Staged Adoption
+
+**Phase 1 (at v1.0 release): Do not adopt**
+
+- Release and stabilize hono-problem-details independently first
+- hono-idempotency / hono-webhook-verify keep their own errors.ts
+- Reason: adopting before API stabilizes creates version coupling risk
+
+**Phase 2 (after hono-problem-details v1.0 stable): Add as optional peerDependency**
+
+```jsonc
+// hono-idempotency/package.json
+{
+  "peerDependencies": {
+    "hono": ">=4.0.0",
+    "hono-problem-details": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "hono-problem-details": { "optional": true }
+  }
+}
+```
+
+> Note: Each library's errors.ts is only ~20-30 lines. The benefit of adopting is less about code reduction and more about ecosystem branding — having hono-problem-details in the npm dependency graph naturally increases user awareness, leading to adoption in their own `app.onError` setup. The marketing value outweighs the technical value.
 
 ## Stretch Goals
 
