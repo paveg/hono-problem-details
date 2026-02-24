@@ -1,5 +1,14 @@
 # hono-problem-details
 
+## 0.1.1
+
+### Patch Changes
+
+- [`a905bdf`](https://github.com/paveg/hono-problem-details/commit/a905bdfba70d8ba0cd679d424c3355c91c1af5a6) Thanks [@paveg](https://github.com/paveg)! - Fix extension members overwriting standard RFC 9457 fields
+
+  - Standard fields (type, status, title, detail, instance) now always take precedence over extension keys with the same name
+  - Add 12 boundary tests for edge cases
+
 ## 0.1.0
 
 ### Minor Changes
