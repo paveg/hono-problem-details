@@ -1,0 +1,187 @@
+import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
+import { describe, expect, it } from "vitest";
+import { ProblemDetailsError } from "../src/error.js";
+import { problemDetails } from "../src/factory.js";
+import { problemDetailsHandler } from "../src/handler.js";
+
+function createApp(options?: Parameters<typeof problemDetailsHandler>[0]) {
+	const app = new Hono();
+	app.onError(problemDetailsHandler(options));
+	return app;
+}
+
+describe("problemDetailsHandler", () => {
+	it("H1: returns ProblemDetailsError response as-is", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw problemDetails({
+				status: 409,
+				type: "https://example.com/conflict",
+				title: "Conflict",
+				detail: "Resource already exists",
+			});
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(409);
+		const body = await res.json();
+		expect(body.type).toBe("https://example.com/conflict");
+		expect(body.title).toBe("Conflict");
+		expect(body.detail).toBe("Resource already exists");
+	});
+
+	it("H2: converts HTTPException to Problem Details", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new HTTPException(403, { message: "Forbidden" });
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(403);
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.status).toBe(403);
+		expect(body.title).toBe("Forbidden");
+		expect(body.detail).toBe("Forbidden");
+	});
+
+	it("H3: converts generic Error to 500 Problem Details", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new Error("Something broke");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.status).toBe(500);
+		expect(body.title).toBe("Internal Server Error");
+	});
+
+	it("H4: uses typePrefix to build type URI", async () => {
+		const app = createApp({ typePrefix: "https://api.example.com/problems" });
+		app.get("/", () => {
+			throw new HTTPException(422);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("https://api.example.com/problems/unprocessable-content");
+	});
+
+	it("H5: uses about:blank when typePrefix is not set", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new HTTPException(404);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+	});
+
+	it("H6: includes stack trace in detail when includeStack is true", async () => {
+		const app = createApp({ includeStack: true });
+		app.get("/", () => {
+			throw new Error("Debug error");
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.detail).toContain("Debug error");
+		expect(body.detail).toContain("at");
+	});
+
+	it("H7: excludes stack trace by default", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new Error("Secret error");
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.detail).toBeUndefined();
+	});
+
+	it("H8: uses mapError custom mapping", async () => {
+		class CustomError extends Error {
+			statusCode = 418;
+		}
+		const app = createApp({
+			mapError: (error) => {
+				if (error instanceof CustomError) {
+					return {
+						status: error.statusCode,
+						title: "I'm a Teapot",
+						detail: error.message,
+					};
+				}
+				return undefined;
+			},
+		});
+		app.get("/", () => {
+			throw new CustomError("Custom error");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(418);
+		const body = await res.json();
+		expect(body.title).toBe("I'm a Teapot");
+		expect(body.detail).toBe("Custom error");
+	});
+
+	it("H9: falls back to default when mapError returns undefined", async () => {
+		const app = createApp({
+			mapError: () => undefined,
+		});
+		app.get("/", () => {
+			throw new Error("Unmapped error");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.title).toBe("Internal Server Error");
+	});
+
+	it("uses 'Unknown Error' title when mapError returns unmapped status", async () => {
+		const app = createApp({
+			mapError: () => ({ status: 418 }),
+		});
+		app.get("/", () => {
+			throw new Error("test");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(418);
+		const body = await res.json();
+		expect(body.title).toBe("Unknown Error");
+	});
+
+	it("H10: sets Content-Type to application/problem+json", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new HTTPException(400);
+		});
+		const res = await app.request("/");
+		expect(res.headers.get("Content-Type")).toBe("application/problem+json");
+	});
+
+	it("uses defaultType option when set", async () => {
+		const app = createApp({ defaultType: "https://example.com/default" });
+		app.get("/", () => {
+			throw new HTTPException(400);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("https://example.com/default");
+	});
+
+	it("H11: sets problemDetails on context", async () => {
+		let captured: unknown;
+		const app = new Hono();
+		app.use(async (c, next) => {
+			await next();
+			captured = c.get("problemDetails");
+		});
+		app.onError(problemDetailsHandler());
+		app.get("/", () => {
+			throw new HTTPException(404);
+		});
+		await app.request("/");
+		expect(captured).toBeDefined();
+		expect((captured as { status: number }).status).toBe(404);
+	});
+});

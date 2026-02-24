@@ -1,0 +1,71 @@
+import type { Context, ErrorHandler } from "hono";
+import { HTTPException } from "hono/http-exception";
+import { ProblemDetailsError } from "./error.js";
+import { statusToPhrase, statusToSlug } from "./status.js";
+import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.js";
+
+function buildType(status: number, options: ProblemDetailsHandlerOptions): string {
+	if (options.typePrefix) {
+		const slug = statusToSlug(status);
+		if (slug) return `${options.typePrefix}/${slug}`;
+	}
+	return options.defaultType ?? "about:blank";
+}
+
+function toResponse(input: ProblemDetailsInput, c: Context): Response {
+	const pd = {
+		type: input.type ?? "about:blank",
+		status: input.status,
+		title: input.title ?? statusToPhrase(input.status) ?? "Unknown Error",
+		detail: input.detail,
+		instance: input.instance,
+	};
+
+	const { extensions, ...rest } = { extensions: input.extensions, ...pd };
+	const body = { ...rest, ...extensions };
+
+	c.set("problemDetails", pd);
+
+	return new Response(JSON.stringify(body), {
+		status: pd.status,
+		headers: { "Content-Type": "application/problem+json" },
+	});
+}
+
+export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}): ErrorHandler {
+	return (error, c) => {
+		if (error instanceof ProblemDetailsError) {
+			c.set("problemDetails", error.problemDetails);
+			return error.getResponse();
+		}
+
+		if (options.mapError) {
+			const mapped = options.mapError(error);
+			if (mapped) {
+				return toResponse(mapped, c);
+			}
+		}
+
+		if (error instanceof HTTPException) {
+			return toResponse(
+				{
+					status: error.status,
+					type: buildType(error.status, options),
+					title: statusToPhrase(error.status),
+					detail: error.message,
+				},
+				c,
+			);
+		}
+
+		return toResponse(
+			{
+				status: 500,
+				type: buildType(500, options),
+				title: "Internal Server Error",
+				detail: options.includeStack ? error.stack : undefined,
+			},
+			c,
+		);
+	};
+}
