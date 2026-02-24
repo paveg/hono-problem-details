@@ -169,6 +169,69 @@ describe("problemDetailsHandler", () => {
 		expect(body.type).toBe("https://example.com/default");
 	});
 
+	it("H12: localize callback transforms ProblemDetails before response", async () => {
+		const app = createApp({
+			localize: (pd, c) => ({
+				...pd,
+				title: `[ja] ${pd.title}`,
+				detail: pd.detail ? `[ja] ${pd.detail}` : undefined,
+			}),
+		});
+		app.get("/", () => {
+			throw new HTTPException(404, { message: "Resource not found" });
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.title).toBe("[ja] Not Found");
+		expect(body.detail).toBe("[ja] Resource not found");
+	});
+
+	it("H13: localize receives Hono context for Accept-Language access", async () => {
+		const app = createApp({
+			localize: (pd, c) => {
+				const lang = c.req.header("Accept-Language");
+				if (lang?.startsWith("ja")) {
+					return { ...pd, title: "見つかりません" };
+				}
+				return pd;
+			},
+		});
+		app.get("/", () => {
+			throw new HTTPException(404);
+		});
+		const res = await app.request("/", {
+			headers: { "Accept-Language": "ja-JP" },
+		});
+		const body = await res.json();
+		expect(body.title).toBe("見つかりません");
+	});
+
+	it("H14: localize applies to generic Error responses", async () => {
+		const app = createApp({
+			localize: (pd) => ({ ...pd, title: "Erreur Interne" }),
+		});
+		app.get("/", () => {
+			throw new Error("crash");
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.title).toBe("Erreur Interne");
+		expect(body.status).toBe(500);
+	});
+
+	it("H15: localize applies to mapError responses", async () => {
+		const app = createApp({
+			mapError: () => ({ status: 409, title: "Conflict", detail: "Already exists" }),
+			localize: (pd) => ({ ...pd, title: "Conflit" }),
+		});
+		app.get("/", () => {
+			throw new Error("test");
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.title).toBe("Conflit");
+	});
+
 	it("H11: sets problemDetails on context", async () => {
 		let captured: unknown;
 		const app = new Hono();

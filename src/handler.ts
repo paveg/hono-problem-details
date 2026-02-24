@@ -12,16 +12,25 @@ function buildType(status: number, options: ProblemDetailsHandlerOptions): strin
 	return options.defaultType ?? "about:blank";
 }
 
-function toResponse(input: ProblemDetailsInput, c: Context): Response {
-	const pd = {
+function toResponse(
+	input: ProblemDetailsInput,
+	c: Context,
+	options: ProblemDetailsHandlerOptions,
+): Response {
+	let pd = {
 		type: input.type ?? "about:blank",
 		status: input.status,
 		title: input.title ?? statusToPhrase(input.status) ?? "Unknown Error",
 		detail: input.detail,
 		instance: input.instance,
+		extensions: input.extensions,
 	};
 
-	const { extensions, ...rest } = { extensions: input.extensions, ...pd };
+	if (options.localize) {
+		pd = { ...pd, ...options.localize(pd, c) };
+	}
+
+	const { extensions, ...rest } = pd;
 	const body = { ...rest, ...extensions };
 
 	c.set("problemDetails", pd);
@@ -42,7 +51,7 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 		if (options.mapError) {
 			const mapped = options.mapError(error);
 			if (mapped) {
-				return toResponse(mapped, c);
+				return toResponse(mapped, c, options);
 			}
 		}
 
@@ -55,6 +64,7 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 					detail: error.message,
 				},
 				c,
+				options,
 			);
 		}
 
@@ -66,6 +76,7 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 				detail: options.includeStack ? error.stack : undefined,
 			},
 			c,
+			options,
 		);
 	};
 }

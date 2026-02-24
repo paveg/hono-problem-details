@@ -42,4 +42,6 @@ export interface ProblemDetailsHandlerOptions {
 	includeStack?: boolean;
 	/** Custom error to ProblemDetails mapping */
 	mapError?: (error: Error) => ProblemDetailsInput | undefined;
+	/** Localize title/detail before sending the response */
+	localize?: (pd: ProblemDetails, c: import("hono").Context) => ProblemDetails;
 }
