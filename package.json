@@ -1,0 +1,99 @@
+{
+	"name": "hono-problem-details",
+	"version": "0.0.0",
+	"description": "RFC 9457 Problem Details middleware for Hono",
+	"type": "module",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./zod": {
+			"import": {
+				"types": "./dist/integrations/zod.d.ts",
+				"default": "./dist/integrations/zod.js"
+			},
+			"require": {
+				"types": "./dist/integrations/zod.d.cts",
+				"default": "./dist/integrations/zod.cjs"
+			}
+		},
+		"./valibot": {
+			"import": {
+				"types": "./dist/integrations/valibot.d.ts",
+				"default": "./dist/integrations/valibot.js"
+			},
+			"require": {
+				"types": "./dist/integrations/valibot.d.cts",
+				"default": "./dist/integrations/valibot.cjs"
+			}
+		}
+	},
+	"files": ["dist"],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tsup",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit",
+		"release": "pnpm build && changeset publish",
+		"version-packages": "changeset version && pnpm lint:fix"
+	},
+	"keywords": ["hono", "rfc9457", "problem-details", "error-handling", "middleware", "api"],
+	"license": "MIT",
+	"peerDependencies": {
+		"hono": ">=4.0.0"
+	},
+	"peerDependenciesMeta": {
+		"@hono/zod-validator": {
+			"optional": true
+		},
+		"zod": {
+			"optional": true
+		},
+		"@hono/valibot-validator": {
+			"optional": true
+		},
+		"valibot": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.0",
+		"@changesets/changelog-github": "0.5.2",
+		"@changesets/cli": "2.29.8",
+		"@hono/valibot-validator": "^0.5.0",
+		"@hono/zod-validator": "^0.5.0",
+		"@vitest/coverage-v8": "^3.0.0",
+		"hono": "^4.7.0",
+		"lefthook": "2.1.1",
+		"tsup": "^8.0.0",
+		"typescript": "^5.7.0",
+		"valibot": "^1.0.0",
+		"vitest": "^3.0.0",
+		"zod": "^3.24.0"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"packageManager": "pnpm@10.14.0",
+	"pnpm": {
+		"onlyBuiltDependencies": ["@biomejs/biome", "esbuild", "lefthook"]
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
+	}
+}
