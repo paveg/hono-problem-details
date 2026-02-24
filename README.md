@@ -87,6 +87,40 @@ throw problemDetails({
 // }
 ```
 
+## Problem Type Registry
+
+Pre-define your API's error types for type-safe error creation:
+
+```ts
+import { createProblemTypeRegistry } from "hono-problem-details";
+
+const problems = createProblemTypeRegistry({
+  ORDER_CONFLICT: {
+    type: "https://api.example.com/problems/order-conflict",
+    status: 409,
+    title: "Order Conflict",
+  },
+  RATE_LIMITED: {
+    type: "https://api.example.com/problems/rate-limited",
+    status: 429,
+    title: "Too Many Requests",
+  },
+});
+
+// Type-safe error creation
+app.post("/orders", (c) => {
+  throw problems.create("ORDER_CONFLICT", {
+    detail: `Order ${id} already exists`,
+    instance: `/orders/${id}`,
+  });
+});
+
+// With extensions
+throw problems.create("RATE_LIMITED", {
+  extensions: { retryAfter: 60 },
+});
+```
+
 ## Zod Validator Integration
 
 ```ts

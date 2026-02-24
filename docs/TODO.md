@@ -208,5 +208,5 @@ This is correct. Call `getResponse()` inside middleware to return directly. No d
 - [x] OpenAPI integration (`hono-problem-details/openapi`) — ProblemDetailsSchema, createProblemDetailsSchema, problemDetailsResponse for @hono/zod-openapi
 - [x] Standard Schema integration (`hono-problem-details/standard-schema`) — standardSchemaProblemHook for @hono/standard-validator
 - [ ] i18n — title/detail localization
-- [ ] Problem type registry — helpers for defining/managing custom problem types
+- [x] Problem type registry — createProblemTypeRegistry() for type-safe error creation
 - [ ] Express adapter — alternative to express-http-problem-details
