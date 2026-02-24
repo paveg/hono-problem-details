@@ -31,7 +31,7 @@ function toResponse(
 	}
 
 	const { extensions, ...rest } = pd;
-	const body = { ...rest, ...extensions };
+	const body = { ...extensions, ...rest };
 
 	c.set("problemDetails", pd);
 

@@ -247,4 +247,95 @@ describe("problemDetailsHandler", () => {
 		expect(captured).toBeDefined();
 		expect((captured as { status: number }).status).toBe(404);
 	});
+
+	it("H16: sets problemDetails on context for ProblemDetailsError", async () => {
+		let captured: unknown;
+		const app = new Hono();
+		app.use(async (c, next) => {
+			await next();
+			captured = c.get("problemDetails");
+		});
+		app.onError(problemDetailsHandler());
+		app.get("/", () => {
+			throw problemDetails({ status: 409, title: "Conflict" });
+		});
+		await app.request("/");
+		expect(captured).toBeDefined();
+		expect((captured as { status: number }).status).toBe(409);
+	});
+
+	it("H17: localize is NOT applied to ProblemDetailsError (uses pre-built response)", async () => {
+		const app = createApp({
+			localize: (pd) => ({ ...pd, title: "Localized" }),
+		});
+		app.get("/", () => {
+			throw problemDetails({ status: 404, title: "Not Found" });
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.title).toBe("Not Found");
+	});
+
+	it("H18: falls back to about:blank when typePrefix is set but status is unknown", async () => {
+		const app = createApp({ typePrefix: "https://api.example.com/problems" });
+		app.get("/", () => {
+			throw new HTTPException(418);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+	});
+
+	it("H19: uses defaultType when typePrefix is set but slug is unknown", async () => {
+		const app = createApp({
+			typePrefix: "https://api.example.com/problems",
+			defaultType: "https://api.example.com/problems/unknown",
+		});
+		app.get("/", () => {
+			throw new HTTPException(418);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("https://api.example.com/problems/unknown");
+	});
+
+	it("H20: defaults type to about:blank when mapError omits type", async () => {
+		const app = createApp({
+			mapError: () => ({ status: 409, title: "Conflict" }),
+		});
+		app.get("/", () => {
+			throw new Error("test");
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+	});
+
+	it("H21: standard fields not overwritten by extensions in handler path", async () => {
+		const app = createApp({
+			mapError: () => ({
+				status: 422,
+				title: "Validation Error",
+				extensions: { status: 200, title: "Fake" },
+			}),
+		});
+		app.get("/", () => {
+			throw new Error("test");
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.status).toBe(422);
+		expect(body.title).toBe("Validation Error");
+		expect(res.status).toBe(422);
+	});
+
+	it("H22: HTTP response status matches body status (RFC 9457)", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new HTTPException(422);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(res.status).toBe(body.status);
+	});
 });
