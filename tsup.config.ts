@@ -6,6 +6,7 @@ export default defineConfig({
 		"integrations/zod": "src/integrations/zod.ts",
 		"integrations/valibot": "src/integrations/valibot.ts",
 		"integrations/openapi": "src/integrations/openapi.ts",
+		"integrations/standard-schema": "src/integrations/standard-schema.ts",
 	},
 	format: ["esm", "cjs"],
 	dts: true,
@@ -18,5 +19,7 @@ export default defineConfig({
 		"@hono/zod-validator",
 		"@hono/valibot-validator",
 		"valibot",
+		"@hono/standard-validator",
+		"@standard-schema/spec",
 	],
 });

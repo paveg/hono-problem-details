@@ -11,6 +11,7 @@ Returns `application/problem+json` structured error responses with a single `app
 - **Zod integration** — `@hono/zod-validator` hook for validation errors
 - **Valibot integration** — `@hono/valibot-validator` hook for validation errors
 - **OpenAPI integration** — `@hono/zod-openapi` schemas for API documentation
+- **Standard Schema** — `@hono/standard-validator` hook (works with any schema library)
 - **Type-safe** — full TypeScript support with inference
 - **Zero external dependencies** — only `hono` as peer dependency
 - **Edge-first** — works on Cloudflare Workers, Deno, Bun, and Node.js
@@ -128,6 +129,25 @@ const schema = v.object({
 });
 
 app.post("/users", vValidator("json", schema, valibotProblemHook()), (c) => {
+  const data = c.req.valid("json");
+  // ...
+});
+```
+
+## Standard Schema Integration
+
+Works with any [Standard Schema](https://standardschema.dev/) compatible library (Zod, Valibot, ArkType, etc.):
+
+```ts
+import { sValidator } from "@hono/standard-validator";
+import { standardSchemaProblemHook } from "hono-problem-details/standard-schema";
+import { z } from "zod"; // or valibot, arktype, etc.
+
+const schema = z.object({
+  email: z.string().email(),
+});
+
+app.post("/users", sValidator("json", schema, standardSchemaProblemHook()), (c) => {
   const data = c.req.valid("json");
   // ...
 });
