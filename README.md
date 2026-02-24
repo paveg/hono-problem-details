@@ -14,6 +14,7 @@ Returns `application/problem+json` structured error responses with a single `app
 - **Standard Schema** — `@hono/standard-validator` hook (works with any schema library)
 - **Type-safe** — full TypeScript support with inference
 - **Zero external dependencies** — only `hono` as peer dependency
+- **Localization** — `localize` callback for title/detail translation
 - **Edge-first** — works on Cloudflare Workers, Deno, Bun, and Node.js
 
 ## Install
@@ -233,6 +234,24 @@ const errorWithExtensions = createProblemDetailsSchema(
 // Use: problemDetailsResponse(422, "Validation Error", errorWithExtensions)
 ```
 
+## Localization
+
+Use the `localize` callback to translate `title` and `detail` based on the request context:
+
+```ts
+problemDetailsHandler({
+  localize: (pd, c) => {
+    const lang = c.req.header("Accept-Language");
+    if (lang?.startsWith("ja")) {
+      return { ...pd, title: translate("ja", pd.title) };
+    }
+    return pd;
+  },
+});
+```
+
+The callback receives the fully-built `ProblemDetails` object and the Hono `Context`, allowing access to headers like `Accept-Language`. Return a new `ProblemDetails` with translated fields.
+
 ## Handler Options
 
 ```ts
@@ -245,6 +264,9 @@ problemDetailsHandler({
 
   // Include stack trace in detail (for development)
   includeStack: process.env.NODE_ENV === "development",
+
+  // Localize title/detail before sending the response
+  localize: (pd, c) => ({ ...pd, title: `[${lang}] ${pd.title}` }),
 
   // Custom error mapping
   mapError: (error) => {

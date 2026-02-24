@@ -67,7 +67,7 @@
 ### 1.7 Error Handler
 
 - [x] `src/handler.ts` — problemDetailsHandler()
-- [x] Tests (13 tests): H1-H11 + defaultType + unknown status via mapError
+- [x] Tests (17 tests): H1-H15 + defaultType + unknown status via mapError
 
 ## Phase 2: Validator Integration
 
@@ -207,6 +207,6 @@ This is correct. Call `getResponse()` inside middleware to return directly. No d
 
 - [x] OpenAPI integration (`hono-problem-details/openapi`) — ProblemDetailsSchema, createProblemDetailsSchema, problemDetailsResponse for @hono/zod-openapi
 - [x] Standard Schema integration (`hono-problem-details/standard-schema`) — standardSchemaProblemHook for @hono/standard-validator
-- [ ] i18n — title/detail localization
+- [x] i18n — `localize` callback on ProblemDetailsHandlerOptions for title/detail localization
 - [x] Problem type registry — createProblemTypeRegistry() for type-safe error creation
 - [ ] Express adapter — alternative to express-http-problem-details
