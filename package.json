@@ -82,6 +82,12 @@
 		"zod",
 		"valibot"
 	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/paveg/hono-problem-details"
+	},
+	"homepage": "https://github.com/paveg/hono-problem-details#readme",
+	"bugs": "https://github.com/paveg/hono-problem-details/issues",
 	"license": "MIT",
 	"peerDependencies": {
 		"hono": ">=4.0.0"
