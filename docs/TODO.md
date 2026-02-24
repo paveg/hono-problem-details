@@ -124,7 +124,7 @@
 
 ## Stretch Goals
 
-- [ ] OpenAPI integration (`hono-problem-details/openapi`) — auto-generate error schemas for @hono/zod-openapi
+- [x] OpenAPI integration (`hono-problem-details/openapi`) — ProblemDetailsSchema, createProblemDetailsSchema, problemDetailsResponse for @hono/zod-openapi
 - [ ] Standard Schema integration (`hono-problem-details/standard-schema`) — ArkType support
 - [ ] i18n — title/detail localization
 - [ ] Problem type registry — helpers for defining/managing custom problem types

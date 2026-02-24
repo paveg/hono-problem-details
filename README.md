@@ -10,6 +10,7 @@ Returns `application/problem+json` structured error responses with a single `app
 - **Hono native** — `app.onError` handler + `createMiddleware()` patterns
 - **Zod integration** — `@hono/zod-validator` hook for validation errors
 - **Valibot integration** — `@hono/valibot-validator` hook for validation errors
+- **OpenAPI integration** — `@hono/zod-openapi` schemas for API documentation
 - **Type-safe** — full TypeScript support with inference
 - **Zero external dependencies** — only `hono` as peer dependency
 - **Edge-first** — works on Cloudflare Workers, Deno, Bun, and Node.js
@@ -130,6 +131,52 @@ app.post("/users", vValidator("json", schema, valibotProblemHook()), (c) => {
   const data = c.req.valid("json");
   // ...
 });
+```
+
+## OpenAPI Integration
+
+Use with `@hono/zod-openapi` to document Problem Details error responses in your OpenAPI spec:
+
+```ts
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { problemDetailsHandler } from "hono-problem-details";
+import {
+  ProblemDetailsSchema,
+  createProblemDetailsSchema,
+  problemDetailsResponse,
+} from "hono-problem-details/openapi";
+
+const app = new OpenAPIHono();
+app.onError(problemDetailsHandler());
+
+// Use problemDetailsResponse() in route definitions
+const route = createRoute({
+  method: "get",
+  path: "/users/{id}",
+  request: {
+    params: z.object({ id: z.string() }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ id: z.string(), name: z.string() }),
+        },
+      },
+      description: "User found",
+    },
+    404: problemDetailsResponse(404),
+    422: problemDetailsResponse(422, "Validation Error"),
+  },
+});
+
+// With extension members
+const errorWithExtensions = createProblemDetailsSchema(
+  z.object({
+    errors: z.array(z.object({ field: z.string(), message: z.string() })),
+  }),
+);
+// Use: problemDetailsResponse(422, "Validation Error", errorWithExtensions)
 ```
 
 ## Handler Options
