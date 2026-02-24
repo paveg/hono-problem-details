@@ -1,0 +1,13 @@
+{
+	"name": "@paveg/hono-problem-details",
+	"version": "0.0.0",
+	"exports": {
+		".": "./src/index.ts",
+		"./zod": "./src/integrations/zod.ts",
+		"./valibot": "./src/integrations/valibot.ts",
+		"./openapi": "./src/integrations/openapi.ts"
+	},
+	"publish": {
+		"include": ["src", "LICENSE", "README.md", "jsr.json"]
+	}
+}
