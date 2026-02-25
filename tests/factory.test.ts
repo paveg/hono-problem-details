@@ -110,4 +110,24 @@ describe("problemDetails factory", () => {
 		const response = error.getResponse();
 		expect(response.headers.get("Content-Type")).toBe("application/problem+json; charset=utf-8");
 	});
+
+	it("F12: getResponse() clamps out-of-range status to 500", () => {
+		const error = problemDetails({ status: 9999 });
+		const response = error.getResponse();
+		expect(response.status).toBe(500);
+	});
+
+	it("F13: getResponse() clamps 1xx status to 500", () => {
+		const error = problemDetails({ status: 100 });
+		const response = error.getResponse();
+		expect(response.status).toBe(500);
+	});
+
+	it("F14: getResponse() preserves original status in body even when HTTP status is clamped", async () => {
+		const error = problemDetails({ status: 9999 });
+		const response = error.getResponse();
+		const body = await response.json();
+		expect(body.status).toBe(9999);
+		expect(response.status).toBe(500);
+	});
 });

@@ -3,25 +3,9 @@ import { HTTPException } from "hono/http-exception";
 import { ProblemDetailsError } from "./error.js";
 import { statusToPhrase, statusToSlug } from "./status.js";
 import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.js";
+import { PROBLEM_JSON_CONTENT_TYPE, clampHttpStatus, sanitizeExtensions } from "./utils.js";
 
-export const PROBLEM_JSON_CONTENT_TYPE = "application/problem+json; charset=utf-8";
-
-const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
-
-/** Strip keys that could cause prototype pollution in downstream consumers */
-export function sanitizeExtensions(
-	extensions: Record<string, unknown> | undefined,
-): Record<string, unknown> | undefined {
-	if (!extensions) return extensions;
-	let filtered: Record<string, unknown> | undefined;
-	for (const key of Object.keys(extensions)) {
-		if (DANGEROUS_KEYS.has(key)) {
-			if (!filtered) filtered = { ...extensions };
-			delete filtered[key];
-		}
-	}
-	return filtered ?? extensions;
-}
+export { PROBLEM_JSON_CONTENT_TYPE, sanitizeExtensions };
 
 function buildType(status: number, options: ProblemDetailsHandlerOptions): string {
 	if (options.typePrefix) {
@@ -54,8 +38,7 @@ function toResponse(
 
 	c.set("problemDetails", pd);
 
-	// HTTP status must be 100-599; use body status as-is (RFC 9457 advisory)
-	const httpStatus = pd.status >= 100 && pd.status <= 599 ? pd.status : 500;
+	const httpStatus = clampHttpStatus(pd.status);
 
 	return new Response(JSON.stringify(body), {
 		status: httpStatus,
