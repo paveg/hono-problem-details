@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.1.2
+
+### Patch Changes
+
+- [`6210996`](https://github.com/paveg/hono-problem-details/commit/6210996225347c81384d10485ee0d2df85c21e7f) Thanks [@paveg](https://github.com/paveg)! - Security hardening: strip dangerous keys from extensions, add charset=utf-8 to Content-Type, validate HTTP status code range
+
 ## 0.1.1
 
 ### Patch Changes
