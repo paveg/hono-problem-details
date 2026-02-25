@@ -1,6 +1,11 @@
 import { statusToPhrase } from "./status.js";
 import type { ProblemDetails, ProblemDetailsInput } from "./types.js";
-import { PROBLEM_JSON_CONTENT_TYPE, clampHttpStatus, sanitizeExtensions } from "./utils.js";
+import {
+	PROBLEM_JSON_CONTENT_TYPE,
+	clampHttpStatus,
+	safeStringify,
+	sanitizeExtensions,
+} from "./utils.js";
 
 function normalizeProblemDetails<T extends Record<string, unknown>>(
 	input: ProblemDetailsInput<T>,
@@ -28,8 +33,9 @@ export class ProblemDetailsError extends Error {
 	getResponse(): Response {
 		const { extensions, ...standard } = this.problemDetails;
 		const body = { ...sanitizeExtensions(extensions), ...standard };
-		return new Response(JSON.stringify(body), {
-			status: clampHttpStatus(this.problemDetails.status),
+		const { json, fallback } = safeStringify(body);
+		return new Response(json, {
+			status: fallback ? 500 : clampHttpStatus(this.problemDetails.status),
 			headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
 		});
 	}

@@ -409,4 +409,35 @@ describe("problemDetailsHandler", () => {
 			expect(body.status).toBe(status);
 		}
 	});
+
+	it("H28: returns fallback response when extensions contain circular reference", async () => {
+		const circular: Record<string, unknown> = {};
+		circular.self = circular;
+		const app = createApp({
+			mapError: () => ({ status: 422, extensions: circular }),
+		});
+		app.get("/", () => {
+			throw new Error("test");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.status).toBe(500);
+		expect(body.title).toBe("Internal Server Error");
+	});
+
+	it("H29: returns fallback response when extensions contain BigInt", async () => {
+		const app = createApp({
+			mapError: () => ({ status: 422, extensions: { big: BigInt(99) } }),
+		});
+		app.get("/", () => {
+			throw new Error("test");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.status).toBe(500);
+	});
 });

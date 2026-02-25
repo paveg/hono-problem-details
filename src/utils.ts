@@ -21,3 +21,18 @@ export function sanitizeExtensions(
 export function clampHttpStatus(status: number): number {
 	return status >= 200 && status <= 599 ? status : 500;
 }
+
+const FALLBACK_BODY = JSON.stringify({
+	type: "about:blank",
+	status: 500,
+	title: "Internal Server Error",
+});
+
+/** JSON.stringify with fallback for non-serializable values (circular refs, BigInt) */
+export function safeStringify(body: unknown): { json: string; fallback: boolean } {
+	try {
+		return { json: JSON.stringify(body), fallback: false };
+	} catch {
+		return { json: FALLBACK_BODY, fallback: true };
+	}
+}
