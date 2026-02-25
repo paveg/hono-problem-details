@@ -69,7 +69,7 @@
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
 		"release": "pnpm build && changeset publish",
-		"version-packages": "changeset version && node -e \"const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));const j=JSON.parse(fs.readFileSync('jsr.json','utf8'));j.version=p.version;fs.writeFileSync('jsr.json',JSON.stringify(j,null,'\\t')+'\\n')\" && pnpm lint:fix"
+		"version-packages": "changeset version && pnpm lint:fix"
 	},
 	"keywords": [
 		"hono",
