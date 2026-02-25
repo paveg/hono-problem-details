@@ -44,7 +44,11 @@ const STATUS_PHRASES: Record<number, string> = {
 const STATUS_SLUGS: Record<number, string> = Object.fromEntries(
 	Object.entries(STATUS_PHRASES).map(([code, phrase]) => [
 		Number(code),
-		phrase.toLowerCase().replace(/ /g, "-"),
+		phrase
+			.toLowerCase()
+			.replace(/'/g, "")
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-|-$/g, ""),
 	]),
 );
 
