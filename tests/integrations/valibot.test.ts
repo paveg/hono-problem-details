@@ -73,14 +73,14 @@ describe("valibotProblemHook", () => {
 		expect(cityError).toBeDefined();
 	});
 
-	it("V5: sets Content-Type to application/problem+json", async () => {
+	it("V5: sets Content-Type to application/problem+json with charset", async () => {
 		const app = createApp();
 		const res = await app.request("/users", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ email: "invalid", age: 25 }),
 		});
-		expect(res.headers.get("Content-Type")).toContain("application/problem+json");
+		expect(res.headers.get("Content-Type")).toBe("application/problem+json; charset=utf-8");
 	});
 
 	it("V6: errors have { field, message, code } structure", async () => {

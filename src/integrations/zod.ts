@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import type { ZodError } from "zod";
+import { PROBLEM_JSON_CONTENT_TYPE } from "../handler.js";
 
 export interface ZodProblemHookOptions {
 	title?: string;
@@ -39,7 +40,7 @@ export function zodProblemHook(
 
 		return new Response(JSON.stringify(body), {
 			status: 422,
-			headers: { "Content-Type": "application/problem+json" },
+			headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
 		});
 	};
 }

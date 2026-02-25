@@ -1,3 +1,5 @@
+import type { Context } from "hono";
+
 /**
  * RFC 9457 Problem Details object.
  * Supports 5 standard fields + extension members.
@@ -43,5 +45,5 @@ export interface ProblemDetailsHandlerOptions {
 	/** Custom error to ProblemDetails mapping */
 	mapError?: (error: Error) => ProblemDetailsInput | undefined;
 	/** Localize title/detail before sending the response */
-	localize?: (pd: ProblemDetails, c: import("hono").Context) => ProblemDetails;
+	localize?: (pd: ProblemDetails, c: Context) => ProblemDetails;
 }

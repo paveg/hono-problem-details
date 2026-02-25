@@ -142,7 +142,7 @@ describe("problemDetailsResponse", () => {
 	});
 
 	it("O15: falls back to 'Error' for unknown status code", () => {
-		const response = problemDetailsResponse(418);
+		const response = problemDetailsResponse(599);
 		expect(response.description).toBe("Error");
 	});
 });

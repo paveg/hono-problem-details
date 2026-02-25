@@ -1,5 +1,6 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type { Context } from "hono";
+import { PROBLEM_JSON_CONTENT_TYPE } from "../handler.js";
 
 export interface StandardSchemaProblemHookOptions {
 	title?: string;
@@ -45,7 +46,7 @@ export function standardSchemaProblemHook(
 
 		return new Response(JSON.stringify(body), {
 			status: 422,
-			headers: { "Content-Type": "application/problem+json" },
+			headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
 		});
 	};
 }

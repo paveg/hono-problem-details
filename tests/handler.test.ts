@@ -139,13 +139,13 @@ describe("problemDetailsHandler", () => {
 
 	it("uses 'Unknown Error' title when mapError returns unmapped status", async () => {
 		const app = createApp({
-			mapError: () => ({ status: 418 }),
+			mapError: () => ({ status: 599 }),
 		});
 		app.get("/", () => {
 			throw new Error("test");
 		});
 		const res = await app.request("/");
-		expect(res.status).toBe(418);
+		expect(res.status).toBe(599);
 		const body = await res.json();
 		expect(body.title).toBe("Unknown Error");
 	});
@@ -296,7 +296,8 @@ describe("problemDetailsHandler", () => {
 	it("H18: falls back to about:blank when typePrefix is set but status is unknown", async () => {
 		const app = createApp({ typePrefix: "https://api.example.com/problems" });
 		app.get("/", () => {
-			throw new HTTPException(418);
+			// biome-ignore lint/suspicious/noExplicitAny: testing with non-standard status code
+			throw new HTTPException(599 as any);
 		});
 		const res = await app.request("/");
 		const body = await res.json();
@@ -309,7 +310,8 @@ describe("problemDetailsHandler", () => {
 			defaultType: "https://api.example.com/problems/unknown",
 		});
 		app.get("/", () => {
-			throw new HTTPException(418);
+			// biome-ignore lint/suspicious/noExplicitAny: testing with non-standard status code
+			throw new HTTPException(599 as any);
 		});
 		const res = await app.request("/");
 		const body = await res.json();
