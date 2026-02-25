@@ -42,7 +42,7 @@ describe("problemDetails factory", () => {
 	it("F4: getResponse() returns correct Content-Type and JSON body", async () => {
 		const error = problemDetails({ status: 400 });
 		const response = error.getResponse();
-		expect(response.headers.get("Content-Type")).toBe("application/problem+json");
+		expect(response.headers.get("Content-Type")).toBe("application/problem+json; charset=utf-8");
 		const body = await response.json();
 		expect(body.type).toBe("about:blank");
 		expect(body.status).toBe(400);
@@ -91,19 +91,23 @@ describe("problemDetails factory", () => {
 		expect(error.message).toBe("Not Found");
 	});
 
-	it("F10: prototype-like extension keys are inert", async () => {
+	it("F10: dangerous extension keys are stripped from response", async () => {
 		const error = problemDetails({
 			status: 400,
-			extensions: { __proto__: { polluted: true }, constructor: "bad" },
+			extensions: { __proto__: { polluted: true }, constructor: "bad", safe: "ok" },
 		});
 		const response = error.getResponse();
 		const body = await response.json();
 		expect(body.status).toBe(400);
-		// constructor extension key appears in serialized body
-		expect(body.constructor).toBe("bad");
-		// __proto__ in object literals sets prototype, not own property — not serialized
+		expect(body.safe).toBe("ok");
+		expect(Object.hasOwn(body, "constructor")).toBe(false);
 		expect(Object.hasOwn(body, "__proto__")).toBe(false);
-		// Object.prototype is not polluted
 		expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+	});
+
+	it("F11: getResponse() includes charset=utf-8 in Content-Type", async () => {
+		const error = problemDetails({ status: 400 });
+		const response = error.getResponse();
+		expect(response.headers.get("Content-Type")).toBe("application/problem+json; charset=utf-8");
 	});
 });

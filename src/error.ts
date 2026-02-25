@@ -1,3 +1,4 @@
+import { PROBLEM_JSON_CONTENT_TYPE, sanitizeExtensions } from "./handler.js";
 import { statusToPhrase } from "./status.js";
 import type { ProblemDetails, ProblemDetailsInput } from "./types.js";
 
@@ -26,10 +27,10 @@ export class ProblemDetailsError extends Error {
 
 	getResponse(): Response {
 		const { extensions, ...standard } = this.problemDetails;
-		const body = { ...extensions, ...standard };
+		const body = { ...sanitizeExtensions(extensions), ...standard };
 		return new Response(JSON.stringify(body), {
 			status: this.problemDetails.status,
-			headers: { "Content-Type": "application/problem+json" },
+			headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
 		});
 	}
 }
