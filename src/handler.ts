@@ -54,8 +54,11 @@ function toResponse(
 
 	c.set("problemDetails", pd);
 
+	// HTTP status must be 100-599; use body status as-is (RFC 9457 advisory)
+	const httpStatus = pd.status >= 100 && pd.status <= 599 ? pd.status : 500;
+
 	return new Response(JSON.stringify(body), {
-		status: pd.status,
+		status: httpStatus,
 		headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
 	});
 }
