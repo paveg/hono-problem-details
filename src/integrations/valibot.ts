@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import type { BaseIssue, SafeParseResult } from "valibot";
+import { PROBLEM_JSON_CONTENT_TYPE } from "../handler.js";
 
 export interface ValibotProblemHookOptions {
 	title?: string;
@@ -36,7 +37,7 @@ export function valibotProblemHook(
 
 		return new Response(JSON.stringify(body), {
 			status: 422,
-			headers: { "Content-Type": "application/problem+json" },
+			headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
 		});
 	};
 }

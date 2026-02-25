@@ -36,7 +36,7 @@ describe("standardSchemaProblemHook", () => {
 			body: JSON.stringify({ email: "invalid" }),
 		});
 		expect(res.status).toBe(422);
-		expect(res.headers.get("Content-Type")).toContain("application/problem+json");
+		expect(res.headers.get("Content-Type")).toBe("application/problem+json; charset=utf-8");
 
 		const body = await res.json();
 		expect(body.type).toBe("about:blank");

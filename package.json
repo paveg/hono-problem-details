@@ -89,6 +89,7 @@
 	"homepage": "https://github.com/paveg/hono-problem-details#readme",
 	"bugs": "https://github.com/paveg/hono-problem-details/issues",
 	"license": "MIT",
+	"author": "Ryota Ikezawa",
 	"peerDependencies": {
 		"hono": ">=4.0.0"
 	},
