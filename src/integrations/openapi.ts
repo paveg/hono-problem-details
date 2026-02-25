@@ -5,7 +5,13 @@ import { statusToPhrase } from "../status.js";
  * Base RFC 9457 Problem Details Zod schema for OpenAPI documentation.
  * Use in createRoute() response definitions with @hono/zod-openapi.
  */
-export const ProblemDetailsSchema = z
+export const ProblemDetailsSchema: z.ZodObject<{
+	type: z.ZodString;
+	status: z.ZodNumber;
+	title: z.ZodString;
+	detail: z.ZodOptional<z.ZodString>;
+	instance: z.ZodOptional<z.ZodString>;
+}> = z
 	.object({
 		type: z.string().openapi({ description: "Problem type URI", example: "about:blank" }),
 		status: z.number().int().openapi({ description: "HTTP status code", example: 400 }),
@@ -21,7 +27,9 @@ export const ProblemDetailsSchema = z
  * Create a Problem Details schema with typed extension members.
  * Extensions are merged at top level per RFC 9457.
  */
-export function createProblemDetailsSchema<T extends z.ZodRawShape>(extensions: z.ZodObject<T>) {
+export function createProblemDetailsSchema<T extends z.ZodRawShape>(
+	extensions: z.ZodObject<T>,
+): z.AnyZodObject {
 	return ProblemDetailsSchema.merge(extensions).openapi({ title: "ProblemDetails" });
 }
 
@@ -33,7 +41,10 @@ export function problemDetailsResponse(
 	status: number,
 	description?: string,
 	schema: z.ZodTypeAny = ProblemDetailsSchema,
-) {
+): {
+	content: { "application/problem+json": { schema: z.ZodTypeAny } };
+	description: string;
+} {
 	return {
 		content: {
 			"application/problem+json": { schema },

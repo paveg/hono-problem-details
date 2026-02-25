@@ -1,6 +1,6 @@
 {
 	"name": "@paveg/hono-problem-details",
-	"version": "0.0.0",
+	"version": "0.1.1",
 	"exports": {
 		".": "./src/index.ts",
 		"./zod": "./src/integrations/zod.ts",

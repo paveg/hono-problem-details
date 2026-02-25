@@ -20,8 +20,10 @@ function formatIssues(issues: BaseIssue<unknown>[]): ValidationError[] {
 	}));
 }
 
-export function valibotProblemHook(options?: ValibotProblemHookOptions) {
-	return (result: SafeParseResult<never> & { target: string }, c: Context) => {
+export function valibotProblemHook(
+	options?: ValibotProblemHookOptions,
+): (result: SafeParseResult<never> & { target: string }, c: Context) => Response | undefined {
+	return (result, c) => {
 		if (result.success) return;
 
 		const body = {
