@@ -99,6 +99,11 @@ describe("problemDetails factory", () => {
 		const response = error.getResponse();
 		const body = await response.json();
 		expect(body.status).toBe(400);
+		// constructor extension key appears in serialized body
+		expect(body.constructor).toBe("bad");
+		// __proto__ in object literals sets prototype, not own property — not serialized
+		expect(Object.hasOwn(body, "__proto__")).toBe(false);
+		// Object.prototype is not polluted
 		expect(({} as Record<string, unknown>).polluted).toBeUndefined();
 	});
 });
