@@ -150,13 +150,30 @@ describe("problemDetailsHandler", () => {
 		expect(body.title).toBe("Unknown Error");
 	});
 
-	it("H10: sets Content-Type to application/problem+json", async () => {
+	it("H10: sets Content-Type with charset=utf-8", async () => {
 		const app = createApp();
 		app.get("/", () => {
 			throw new HTTPException(400);
 		});
 		const res = await app.request("/");
-		expect(res.headers.get("Content-Type")).toBe("application/problem+json");
+		expect(res.headers.get("Content-Type")).toBe("application/problem+json; charset=utf-8");
+	});
+
+	it("H23: extensions with dangerous keys are stripped", async () => {
+		const app = createApp({
+			mapError: () => ({
+				status: 400,
+				extensions: { constructor: "bad", prototype: "bad", safe: "ok" },
+			}),
+		});
+		app.get("/", () => {
+			throw new Error("test");
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.safe).toBe("ok");
+		expect(Object.hasOwn(body, "constructor")).toBe(false);
+		expect(Object.hasOwn(body, "prototype")).toBe(false);
 	});
 
 	it("uses defaultType option when set", async () => {

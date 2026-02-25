@@ -54,7 +54,7 @@ describe("createProblemTypeRegistry", () => {
 		const error = registry.create("NOT_FOUND", { detail: "Item missing" });
 		const res = error.getResponse();
 		expect(res.status).toBe(404);
-		expect(res.headers.get("Content-Type")).toBe("application/problem+json");
+		expect(res.headers.get("Content-Type")).toBe("application/problem+json; charset=utf-8");
 
 		const body = await res.json();
 		expect(body.type).toBe("https://api.example.com/problems/not-found");

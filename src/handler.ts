@@ -4,6 +4,25 @@ import { ProblemDetailsError } from "./error.js";
 import { statusToPhrase, statusToSlug } from "./status.js";
 import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.js";
 
+export const PROBLEM_JSON_CONTENT_TYPE = "application/problem+json; charset=utf-8";
+
+const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+/** Strip keys that could cause prototype pollution in downstream consumers */
+export function sanitizeExtensions(
+	extensions: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
+	if (!extensions) return extensions;
+	let filtered: Record<string, unknown> | undefined;
+	for (const key of Object.keys(extensions)) {
+		if (DANGEROUS_KEYS.has(key)) {
+			if (!filtered) filtered = { ...extensions };
+			delete filtered[key];
+		}
+	}
+	return filtered ?? extensions;
+}
+
 function buildType(status: number, options: ProblemDetailsHandlerOptions): string {
 	if (options.typePrefix) {
 		const slug = statusToSlug(status);
@@ -31,13 +50,13 @@ function toResponse(
 	}
 
 	const { extensions, ...rest } = pd;
-	const body = { ...extensions, ...rest };
+	const body = { ...sanitizeExtensions(extensions), ...rest };
 
 	c.set("problemDetails", pd);
 
 	return new Response(JSON.stringify(body), {
 		status: pd.status,
-		headers: { "Content-Type": "application/problem+json" },
+		headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
 	});
 }
 
