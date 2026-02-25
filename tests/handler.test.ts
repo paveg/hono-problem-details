@@ -355,4 +355,41 @@ describe("problemDetailsHandler", () => {
 		const body = await res.json();
 		expect(res.status).toBe(body.status);
 	});
+
+	it("H24: clamps invalid status code to 500 in HTTP response", async () => {
+		const app = createApp({
+			mapError: () => ({ status: 9999, title: "Invalid" }),
+		});
+		app.get("/", () => {
+			throw new Error("test");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.status).toBe(9999);
+	});
+
+	it("H25: clamps negative status code to 500", async () => {
+		const app = createApp({
+			mapError: () => ({ status: -1, title: "Negative" }),
+		});
+		app.get("/", () => {
+			throw new Error("test");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+	});
+
+	it("H26: accepts valid error status codes (400-599)", async () => {
+		for (const status of [400, 404, 500, 599]) {
+			const app = createApp({
+				mapError: () => ({ status, title: "Test" }),
+			});
+			app.get("/", () => {
+				throw new Error("test");
+			});
+			const res = await app.request("/");
+			expect(res.status).toBe(status);
+		}
+	});
 });
