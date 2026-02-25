@@ -29,6 +29,7 @@ describe("statusToSlug", () => {
 		[403, "forbidden"],
 		[404, "not-found"],
 		[409, "conflict"],
+		[418, "im-a-teapot"],
 		[422, "unprocessable-content"],
 		[429, "too-many-requests"],
 		[500, "internal-server-error"],
