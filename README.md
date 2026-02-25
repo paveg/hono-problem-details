@@ -1,5 +1,8 @@
 # hono-problem-details
 
+[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/paveg/hono-problem-details?utm_source=oss&utm_medium=github&utm_campaign=paveg%2Fhono-problem-details&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
+[![Devin Wiki](https://img.shields.io/badge/Devin-Wiki-blue)](https://app.devin.ai/org/ryota-ikezawa/wiki/paveg/hono-problem-details)
+
 [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html) Problem Details middleware for [Hono](https://hono.dev).
 
 Returns `application/problem+json` structured error responses with a single `app.onError` setup.
