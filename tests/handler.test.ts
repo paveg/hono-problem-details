@@ -394,4 +394,19 @@ describe("problemDetailsHandler", () => {
 			expect(res.status).toBe(status);
 		}
 	});
+
+	it("H27: clamps 1xx status codes to 500 in HTTP response", async () => {
+		for (const status of [100, 101, 150, 199]) {
+			const app = createApp({
+				mapError: () => ({ status, title: "Informational" }),
+			});
+			app.get("/", () => {
+				throw new Error("test");
+			});
+			const res = await app.request("/");
+			expect(res.status).toBe(500);
+			const body = await res.json();
+			expect(body.status).toBe(status);
+		}
+	});
 });
