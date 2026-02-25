@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.1.3
+
+### Patch Changes
+
+- [#51](https://github.com/paveg/hono-problem-details/pull/51) [`327f984`](https://github.com/paveg/hono-problem-details/commit/327f984e7f7a7c1634df2234e32326d481f6b046) Thanks [@paveg](https://github.com/paveg)! - Fix Content-Type consistency in validation hooks, expand STATUS_PHRASES to all RFC 9110 codes, export PROBLEM_JSON_CONTENT_TYPE
+
 ## 0.1.2
 
 ### Patch Changes
