@@ -3,7 +3,12 @@ import { HTTPException } from "hono/http-exception";
 import { ProblemDetailsError } from "./error.js";
 import { statusToPhrase, statusToSlug } from "./status.js";
 import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.js";
-import { PROBLEM_JSON_CONTENT_TYPE, clampHttpStatus, sanitizeExtensions } from "./utils.js";
+import {
+	PROBLEM_JSON_CONTENT_TYPE,
+	clampHttpStatus,
+	safeStringify,
+	sanitizeExtensions,
+} from "./utils.js";
 
 export { PROBLEM_JSON_CONTENT_TYPE, sanitizeExtensions };
 
@@ -38,10 +43,10 @@ function toResponse(
 
 	c.set("problemDetails", pd);
 
-	const httpStatus = clampHttpStatus(pd.status);
+	const { json, fallback } = safeStringify(body);
 
-	return new Response(JSON.stringify(body), {
-		status: httpStatus,
+	return new Response(json, {
+		status: fallback ? 500 : clampHttpStatus(pd.status),
 		headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
 	});
 }
