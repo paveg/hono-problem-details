@@ -1,6 +1,6 @@
 {
 	"name": "hono-problem-details",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"description": "RFC 9457 Problem Details middleware for Hono",
 	"type": "module",
 	"main": "./dist/index.cjs",
