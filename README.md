@@ -282,6 +282,13 @@ problemDetailsHandler({
 });
 ```
 
+## Used By
+
+The following Hono middleware libraries use `hono-problem-details` as an optional dependency for RFC 9457 error responses:
+
+- [hono-idempotency](https://github.com/paveg/hono-idempotency) — Idempotency key middleware for Hono
+- [hono-webhook-verify](https://github.com/paveg/hono-webhook-verify) — Webhook signature verification middleware for Hono
+
 ## License
 
 MIT
