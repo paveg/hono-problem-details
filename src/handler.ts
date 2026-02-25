@@ -44,8 +44,7 @@ function toResponse(
 export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}): ErrorHandler {
 	return (error, c) => {
 		if (error instanceof ProblemDetailsError) {
-			c.set("problemDetails", error.problemDetails);
-			return error.getResponse();
+			return toResponse(error.problemDetails, c, options);
 		}
 
 		if (options.mapError) {
