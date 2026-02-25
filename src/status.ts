@@ -21,12 +21,17 @@ const STATUS_PHRASES: Record<number, string> = {
 	504: "Gateway Timeout",
 };
 
+const STATUS_SLUGS: Record<number, string> = Object.fromEntries(
+	Object.entries(STATUS_PHRASES).map(([code, phrase]) => [
+		Number(code),
+		phrase.toLowerCase().replace(/ /g, "-"),
+	]),
+);
+
 export function statusToPhrase(status: number): string | undefined {
 	return STATUS_PHRASES[status];
 }
 
 export function statusToSlug(status: number): string | undefined {
-	const phrase = STATUS_PHRASES[status];
-	if (!phrase) return undefined;
-	return phrase.toLowerCase().replace(/ /g, "-");
+	return STATUS_SLUGS[status];
 }
