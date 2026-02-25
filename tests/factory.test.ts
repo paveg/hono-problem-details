@@ -130,4 +130,28 @@ describe("problemDetails factory", () => {
 		expect(body.status).toBe(9999);
 		expect(response.status).toBe(500);
 	});
+
+	it("F15: getResponse() returns fallback when extensions contain circular reference", async () => {
+		const circular: Record<string, unknown> = {};
+		circular.self = circular;
+		const error = problemDetails({ status: 422, extensions: circular });
+		const response = error.getResponse();
+		expect(response.status).toBe(500);
+		const body = await response.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.status).toBe(500);
+		expect(body.title).toBe("Internal Server Error");
+	});
+
+	it("F16: getResponse() returns fallback when extensions contain BigInt", async () => {
+		const error = problemDetails({
+			status: 422,
+			extensions: { big: BigInt(42) },
+		});
+		const response = error.getResponse();
+		expect(response.status).toBe(500);
+		const body = await response.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.status).toBe(500);
+	});
 });
