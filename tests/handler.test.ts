@@ -264,7 +264,7 @@ describe("problemDetailsHandler", () => {
 		expect((captured as { status: number }).status).toBe(409);
 	});
 
-	it("H17: localize is NOT applied to ProblemDetailsError (uses pre-built response)", async () => {
+	it("H17: localize applies to ProblemDetailsError", async () => {
 		const app = createApp({
 			localize: (pd) => ({ ...pd, title: "Localized" }),
 		});
@@ -273,7 +273,7 @@ describe("problemDetailsHandler", () => {
 		});
 		const res = await app.request("/");
 		const body = await res.json();
-		expect(body.title).toBe("Not Found");
+		expect(body.title).toBe("Localized");
 	});
 
 	it("H18: falls back to about:blank when typePrefix is set but status is unknown", async () => {
