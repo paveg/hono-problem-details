@@ -24,13 +24,15 @@ function formatIssues(issues: readonly StandardSchemaV1.Issue[]): ValidationErro
 	}));
 }
 
-export function standardSchemaProblemHook(options?: StandardSchemaProblemHookOptions) {
-	return (
-		result:
-			| { success: true; data: unknown }
-			| { success: false; error: readonly StandardSchemaV1.Issue[] },
-		c: Context,
-	) => {
+export function standardSchemaProblemHook(
+	options?: StandardSchemaProblemHookOptions,
+): (
+	result:
+		| { success: true; data: unknown }
+		| { success: false; error: readonly StandardSchemaV1.Issue[] },
+	c: Context,
+) => Response | undefined {
+	return (result, c) => {
 		if (result.success) return;
 
 		const body = {

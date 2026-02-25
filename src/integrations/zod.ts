@@ -20,11 +20,13 @@ function formatErrors(zodError: ZodError): ValidationError[] {
 	}));
 }
 
-export function zodProblemHook(options?: ZodProblemHookOptions) {
-	return (
-		result: { success: true; data: unknown } | { success: false; error: ZodError },
-		c: Context,
-	) => {
+export function zodProblemHook(
+	options?: ZodProblemHookOptions,
+): (
+	result: { success: true; data: unknown } | { success: false; error: ZodError },
+	c: Context,
+) => Response | undefined {
+	return (result, c) => {
 		if (result.success) return;
 
 		const body = {
