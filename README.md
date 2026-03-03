@@ -1,5 +1,8 @@
 # hono-problem-details
 
+[![npm version](https://img.shields.io/npm/v/hono-problem-details)](https://www.npmjs.com/package/hono-problem-details)
+[![CI](https://github.com/paveg/hono-problem-details/actions/workflows/ci.yml/badge.svg)](https://github.com/paveg/hono-problem-details/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/paveg/hono-problem-details?utm_source=oss&utm_medium=github&utm_campaign=paveg%2Fhono-problem-details&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
 [![Devin Wiki](https://img.shields.io/badge/Devin-Wiki-blue)](https://app.devin.ai/org/ryota-ikezawa/wiki/paveg/hono-problem-details)
 
