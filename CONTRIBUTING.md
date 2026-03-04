@@ -41,6 +41,24 @@ pnpm install
 
 We maintain **100% test coverage** on all metrics (statements, branches, functions, lines). All new code must include comprehensive tests.
 
+## Release Flow
+
+```
+push to main
+└─ release.yml triggered
+   └─ changesets/action decides
+      │
+      ├─ .changeset/*.md exists
+      │  → Creates/updates a "Version Packages" PR
+      │    └─ ci-pass status auto-applied → ready to merge
+      │
+      └─ No .changeset/*.md (right after merging Version Packages PR)
+         → npm publish + GitHub Release created automatically
+```
+
+Contributors only need to **add a changeset and submit a PR**.
+Versioning and publishing are fully automated after merge.
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
