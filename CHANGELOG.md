@@ -1,5 +1,16 @@
 # hono-problem-details
 
+## 0.1.5
+
+### Patch Changes
+
+- [`10bd8cc`](https://github.com/paveg/hono-problem-details/commit/10bd8cc0ad16007ccd0cc2ef2182ebce214b44dd) Thanks [@paveg](https://github.com/paveg)! - refactor: extract shared utilities and simplify integrations
+
+  - Extract `normalizeProblemDetails` and `buildProblemResponse` to `utils.ts` eliminating duplication
+  - Create shared `validation.ts` with `buildValidationResponse` for integration hooks
+  - Simplify registry `create` with spread operator
+  - Add 46 new boundary value and edge case tests (131 → 177)
+
 ## 0.1.4
 
 ### Patch Changes
