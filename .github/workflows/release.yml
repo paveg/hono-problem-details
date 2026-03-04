@@ -40,8 +40,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ steps.changesets.outputs.pullRequestNumber }}
         run: |
+          sleep 5
           PR_SHA=$(gh pr view "$PR_NUMBER" --json headRefOid -q .headRefOid)
           gh api "repos/${{ github.repository }}/statuses/${PR_SHA}" \
             -f state=success \
             -f context=ci-pass \
             -f description="Version Packages PR — source already verified on main"
+          # Retry if SHA changed due to API eventual consistency
+          sleep 5
+          NEW_SHA=$(gh pr view "$PR_NUMBER" --json headRefOid -q .headRefOid)
+          if [ "$NEW_SHA" != "$PR_SHA" ]; then
+            gh api "repos/${{ github.repository }}/statuses/${NEW_SHA}" \
+              -f state=success \
+              -f context=ci-pass \
+              -f description="Version Packages PR — source already verified on main"
+          fi
