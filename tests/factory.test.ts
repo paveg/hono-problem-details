@@ -154,4 +154,61 @@ describe("problemDetails factory", () => {
 		expect(body.type).toBe("about:blank");
 		expect(body.status).toBe(500);
 	});
+
+	it("F17: getResponse() includes detail field in response body", async () => {
+		const error = problemDetails({ status: 404, detail: "User 123 not found" });
+		const response = error.getResponse();
+		const body = await response.json();
+		expect(body.detail).toBe("User 123 not found");
+		expect(body.status).toBe(404);
+		expect(body.title).toBe("Not Found");
+	});
+
+	it("F18: dangerous extension key 'prototype' is stripped", async () => {
+		const error = problemDetails({
+			status: 400,
+			extensions: { prototype: "bad", safe: "ok" },
+		});
+		const response = error.getResponse();
+		const body = await response.json();
+		expect(body.safe).toBe("ok");
+		expect(Object.hasOwn(body, "prototype")).toBe(false);
+	});
+
+	it("F19: extensions with only dangerous keys produce clean body", async () => {
+		const error = problemDetails({
+			status: 400,
+			extensions: { __proto__: "x", constructor: "y", prototype: "z" },
+		});
+		const response = error.getResponse();
+		const body = await response.json();
+		expect(body.status).toBe(400);
+		expect(body.type).toBe("about:blank");
+		expect(Object.hasOwn(body, "__proto__")).toBe(false);
+		expect(Object.hasOwn(body, "constructor")).toBe(false);
+		expect(Object.hasOwn(body, "prototype")).toBe(false);
+	});
+
+	it("F20: empty extensions object produces body without extensions key", async () => {
+		const error = problemDetails({ status: 400, extensions: {} });
+		const response = error.getResponse();
+		const body = await response.json();
+		expect(body.status).toBe(400);
+		expect(body.type).toBe("about:blank");
+		expect(Object.hasOwn(body, "extensions")).toBe(false);
+	});
+
+	it("F21: clamps 1xx boundary values (101, 150, 199) to 500", () => {
+		for (const status of [101, 150, 199]) {
+			const error = problemDetails({ status });
+			const response = error.getResponse();
+			expect(response.status).toBe(500);
+		}
+	});
+
+	it("F22: accepts 200 status without clamping", () => {
+		const error = problemDetails({ status: 200 });
+		const response = error.getResponse();
+		expect(response.status).toBe(200);
+	});
 });
