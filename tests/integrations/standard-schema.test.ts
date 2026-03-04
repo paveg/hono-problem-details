@@ -136,6 +136,25 @@ describe("standardSchemaProblemHook", () => {
 		expect(body.detail).toBe("Please check your data");
 	});
 
+	it("S8: handles numeric path segments (array index)", async () => {
+		const app = new Hono();
+		const schema = v.object({
+			items: v.array(v.pipe(v.string(), v.minLength(1))),
+		});
+
+		app.post("/test", sValidator("json", schema, standardSchemaProblemHook()), (c) => {
+			return c.json({ ok: true });
+		});
+
+		const res = await app.request("/test", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ items: ["ok", ""] }),
+		});
+		const body = await res.json();
+		expect(body.errors[0].field).toContain("items");
+	});
+
 	it("S7: handles errors without path", async () => {
 		const app = new Hono();
 		const schema = v.pipe(

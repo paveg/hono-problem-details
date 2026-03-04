@@ -6,11 +6,10 @@ import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.
 import {
 	PROBLEM_JSON_CONTENT_TYPE,
 	clampHttpStatus,
+	normalizeProblemDetails,
 	safeStringify,
 	sanitizeExtensions,
 } from "./utils.js";
-
-export { PROBLEM_JSON_CONTENT_TYPE, sanitizeExtensions };
 
 function buildType(status: number, options: ProblemDetailsHandlerOptions): string {
 	if (options.typePrefix) {
@@ -25,14 +24,7 @@ function toResponse(
 	c: Context,
 	options: ProblemDetailsHandlerOptions,
 ): Response {
-	let pd = {
-		type: input.type ?? "about:blank",
-		status: input.status,
-		title: input.title ?? statusToPhrase(input.status) ?? "Unknown Error",
-		detail: input.detail,
-		instance: input.instance,
-		extensions: input.extensions,
-	};
+	let pd = normalizeProblemDetails(input);
 
 	if (options.localize) {
 		pd = { ...pd, ...options.localize(pd, c) };

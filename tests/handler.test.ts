@@ -440,4 +440,78 @@ describe("problemDetailsHandler", () => {
 		expect(body.type).toBe("about:blank");
 		expect(body.status).toBe(500);
 	});
+
+	it("H30: mapError handles HTTPException — mapError takes precedence", async () => {
+		const app = createApp({
+			mapError: (error) => {
+				if (error instanceof HTTPException) {
+					return { status: 409, title: "Mapped HTTPException" };
+				}
+				return undefined;
+			},
+		});
+		app.get("/", () => {
+			throw new HTTPException(403, { message: "Forbidden" });
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(409);
+		const body = await res.json();
+		expect(body.title).toBe("Mapped HTTPException");
+	});
+
+	it("H31: typePrefix does not override ProblemDetailsError's pre-set type", async () => {
+		const app = createApp({ typePrefix: "https://api.example.com/problems" });
+		app.get("/", () => {
+			throw problemDetails({
+				status: 409,
+				type: "https://custom.example.com/conflict",
+			});
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("https://custom.example.com/conflict");
+	});
+
+	it("H32: localize returning partial fields preserves other fields", async () => {
+		const app = createApp({
+			localize: () => ({ title: "Localized Title" }) as never,
+		});
+		app.get("/", () => {
+			throw new HTTPException(404, { message: "Not found" });
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.title).toBe("Localized Title");
+		expect(body.status).toBe(404);
+		expect(body.type).toBe("about:blank");
+		expect(body.detail).toBe("Not found");
+	});
+
+	it("H33: 2xx status codes are accepted without clamping", async () => {
+		for (const status of [200, 201, 299]) {
+			const app = createApp({
+				mapError: () => ({ status, title: "OK Error" }),
+			});
+			app.get("/", () => {
+				throw new Error("test");
+			});
+			const res = await app.request("/");
+			expect(res.status).toBe(status);
+			const body = await res.json();
+			expect(body.status).toBe(status);
+		}
+	});
+
+	it("H34: 3xx status codes are accepted without clamping", async () => {
+		for (const status of [300, 301, 399]) {
+			const app = createApp({
+				mapError: () => ({ status, title: "Redirect Error" }),
+			});
+			app.get("/", () => {
+				throw new Error("test");
+			});
+			const res = await app.request("/");
+			expect(res.status).toBe(status);
+		}
+	});
 });

@@ -79,4 +79,16 @@ describe("createProblemTypeRegistry", () => {
 		const error = registry.create("ORDER_CONFLICT");
 		expectTypeOf(error).toMatchTypeOf<ProblemDetailsError>();
 	});
+
+	it("R9: empty registry returns empty types array", () => {
+		const empty = createProblemTypeRegistry({});
+		expect(empty.types()).toEqual([]);
+	});
+
+	it("R10: create() without options omits detail and instance", () => {
+		const error = registry.create("ORDER_CONFLICT");
+		expect(error.problemDetails.detail).toBeUndefined();
+		expect(error.problemDetails.instance).toBeUndefined();
+		expect(error.problemDetails.extensions).toBeUndefined();
+	});
 });

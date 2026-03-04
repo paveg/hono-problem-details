@@ -1,16 +1,12 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type { Context } from "hono";
-import { PROBLEM_JSON_CONTENT_TYPE } from "../handler.js";
+import {
+	type ValidationError,
+	type ValidationHookOptions,
+	buildValidationResponse,
+} from "./validation.js";
 
-export interface StandardSchemaProblemHookOptions {
-	title?: string;
-	detail?: string;
-}
-
-interface ValidationError {
-	field: string;
-	message: string;
-}
+export type { ValidationHookOptions as StandardSchemaProblemHookOptions };
 
 function formatPath(path: ReadonlyArray<PropertyKey | StandardSchemaV1.PathSegment>): string {
 	return path
@@ -26,27 +22,15 @@ function formatIssues(issues: readonly StandardSchemaV1.Issue[]): ValidationErro
 }
 
 export function standardSchemaProblemHook(
-	options?: StandardSchemaProblemHookOptions,
+	options?: ValidationHookOptions,
 ): (
 	result:
 		| { success: true; data: unknown }
 		| { success: false; error: readonly StandardSchemaV1.Issue[] },
 	c: Context,
 ) => Response | undefined {
-	return (result, c) => {
+	return (result, _c) => {
 		if (result.success) return;
-
-		const body = {
-			type: "about:blank",
-			status: 422,
-			title: options?.title ?? "Validation Error",
-			detail: options?.detail ?? "Request validation failed",
-			errors: formatIssues(result.error),
-		};
-
-		return new Response(JSON.stringify(body), {
-			status: 422,
-			headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
-		});
+		return buildValidationResponse(formatIssues(result.error), options);
 	};
 }
