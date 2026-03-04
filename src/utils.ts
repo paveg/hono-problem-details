@@ -45,6 +45,17 @@ export function normalizeProblemDetails<T extends Record<string, unknown>>(
 	};
 }
 
+/** Build a RFC 9457 Problem Details Response from a ProblemDetails object */
+export function buildProblemResponse(pd: ProblemDetails): Response {
+	const { extensions, ...standard } = pd;
+	const body = { ...sanitizeExtensions(extensions), ...standard };
+	const { json, fallback } = safeStringify(body);
+	return new Response(json, {
+		status: fallback ? 500 : clampHttpStatus(pd.status),
+		headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
+	});
+}
+
 /** JSON.stringify with fallback for non-serializable values (circular refs, BigInt) */
 export function safeStringify(body: unknown): { json: string; fallback: boolean } {
 	try {

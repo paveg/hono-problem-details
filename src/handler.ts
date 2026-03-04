@@ -3,13 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import { ProblemDetailsError } from "./error.js";
 import { statusToPhrase, statusToSlug } from "./status.js";
 import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.js";
-import {
-	PROBLEM_JSON_CONTENT_TYPE,
-	clampHttpStatus,
-	normalizeProblemDetails,
-	safeStringify,
-	sanitizeExtensions,
-} from "./utils.js";
+import { buildProblemResponse, normalizeProblemDetails } from "./utils.js";
 
 function buildType(status: number, options: ProblemDetailsHandlerOptions): string {
 	if (options.typePrefix) {
@@ -30,17 +24,9 @@ function toResponse(
 		pd = { ...pd, ...options.localize(pd, c) };
 	}
 
-	const { extensions, ...rest } = pd;
-	const body = { ...sanitizeExtensions(extensions), ...rest };
-
 	c.set("problemDetails", pd);
 
-	const { json, fallback } = safeStringify(body);
-
-	return new Response(json, {
-		status: fallback ? 500 : clampHttpStatus(pd.status),
-		headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
-	});
+	return buildProblemResponse(pd);
 }
 
 export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}): ErrorHandler {

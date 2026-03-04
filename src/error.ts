@@ -1,11 +1,5 @@
 import type { ProblemDetails, ProblemDetailsInput } from "./types.js";
-import {
-	PROBLEM_JSON_CONTENT_TYPE,
-	clampHttpStatus,
-	normalizeProblemDetails,
-	safeStringify,
-	sanitizeExtensions,
-} from "./utils.js";
+import { buildProblemResponse, normalizeProblemDetails } from "./utils.js";
 
 export class ProblemDetailsError extends Error {
 	readonly problemDetails: ProblemDetails;
@@ -18,12 +12,6 @@ export class ProblemDetailsError extends Error {
 	}
 
 	getResponse(): Response {
-		const { extensions, ...standard } = this.problemDetails;
-		const body = { ...sanitizeExtensions(extensions), ...standard };
-		const { json, fallback } = safeStringify(body);
-		return new Response(json, {
-			status: fallback ? 500 : clampHttpStatus(this.problemDetails.status),
-			headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
-		});
+		return buildProblemResponse(this.problemDetails);
 	}
 }

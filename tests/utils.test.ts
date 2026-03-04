@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	PROBLEM_JSON_CONTENT_TYPE,
+	buildProblemResponse,
 	clampHttpStatus,
 	normalizeProblemDetails,
 	safeStringify,
@@ -130,5 +131,59 @@ describe("safeStringify", () => {
 	it("U16: returns fallback for BigInt", () => {
 		const { fallback } = safeStringify({ big: BigInt(42) });
 		expect(fallback).toBe(true);
+	});
+});
+
+describe("buildProblemResponse", () => {
+	it("U17: builds response with correct status and Content-Type", async () => {
+		const res = buildProblemResponse({
+			type: "about:blank",
+			status: 404,
+			title: "Not Found",
+		});
+		expect(res.status).toBe(404);
+		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.status).toBe(404);
+		expect(body.title).toBe("Not Found");
+	});
+
+	it("U18: flattens extensions and strips dangerous keys", async () => {
+		const res = buildProblemResponse({
+			type: "about:blank",
+			status: 400,
+			title: "Bad Request",
+			extensions: { constructor: "bad", info: "safe" },
+		});
+		const body = await res.json();
+		expect(body.info).toBe("safe");
+		expect(Object.hasOwn(body, "constructor")).toBe(false);
+		expect(Object.hasOwn(body, "extensions")).toBe(false);
+	});
+
+	it("U19: clamps out-of-range status to 500", async () => {
+		const res = buildProblemResponse({
+			type: "about:blank",
+			status: 9999,
+			title: "Invalid",
+		});
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.status).toBe(9999);
+	});
+
+	it("U20: returns fallback on circular extensions", async () => {
+		const circular: Record<string, unknown> = {};
+		circular.self = circular;
+		const res = buildProblemResponse({
+			type: "about:blank",
+			status: 422,
+			title: "Test",
+			extensions: circular,
+		});
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.title).toBe("Internal Server Error");
 	});
 });
