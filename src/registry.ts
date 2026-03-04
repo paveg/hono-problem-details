@@ -29,17 +29,7 @@ export function createProblemTypeRegistry<K extends string>(
 	definitions: Record<K, ProblemTypeDefinition>,
 ): ProblemTypeRegistry<K> {
 	return {
-		create: (key, options) => {
-			const def = definitions[key];
-			return new ProblemDetailsError({
-				type: def.type,
-				status: def.status,
-				title: def.title,
-				detail: options?.detail,
-				instance: options?.instance,
-				extensions: options?.extensions,
-			});
-		},
+		create: (key, options) => new ProblemDetailsError({ ...definitions[key], ...options }),
 		get: (key) => definitions[key],
 		types: () => Object.keys(definitions) as K[],
 	};
