@@ -68,7 +68,7 @@
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
-		"release": "pnpm build && changeset publish",
+		"release": "pnpm build && changeset publish --no-git-tag",
 		"version-packages": "changeset version && pnpm lint:fix"
 	},
 	"keywords": [
