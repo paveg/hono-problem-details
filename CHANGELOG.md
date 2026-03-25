@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.1.6
+
+### Patch Changes
+
+- [`2daa7c6`](https://github.com/paveg/hono-problem-details/commit/2daa7c641ddd233a06c8b276d8e6699a3199a8a1) Thanks [@paveg](https://github.com/paveg)! - Add `typesVersions` field to support subpath imports with `moduleResolution: "node"`
+
 ## 0.1.5
 
 ### Patch Changes
