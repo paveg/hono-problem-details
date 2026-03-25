@@ -58,6 +58,14 @@
 			}
 		}
 	},
+	"typesVersions": {
+		"*": {
+			"zod": ["./dist/integrations/zod.d.ts"],
+			"valibot": ["./dist/integrations/valibot.d.ts"],
+			"openapi": ["./dist/integrations/openapi.d.ts"],
+			"standard-schema": ["./dist/integrations/standard-schema.d.ts"]
+		}
+	},
 	"files": ["dist"],
 	"sideEffects": false,
 	"scripts": {
