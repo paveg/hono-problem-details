@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import type { BaseIssue, SafeParseResult } from "valibot";
+import type { BaseIssue, GenericSchema, GenericSchemaAsync, SafeParseResult } from "valibot";
 import {
 	type ValidationError,
 	type ValidationHookOptions,
@@ -16,9 +16,9 @@ function formatIssues(issues: BaseIssue<unknown>[]): ValidationError[] {
 	}));
 }
 
-export function valibotProblemHook(
+export function valibotProblemHook<T extends GenericSchema | GenericSchemaAsync = GenericSchema>(
 	options?: ValidationHookOptions,
-): (result: SafeParseResult<never> & { target: string }, c: Context) => Response | undefined {
+): (result: SafeParseResult<T> & { target: string }, c: Context) => Response | undefined {
 	return (result, _c) => {
 		if (result.success) return;
 		return buildValidationResponse(formatIssues(result.issues), options);
