@@ -1,5 +1,7 @@
+import type { Hook } from "@hono/valibot-validator";
 import { vValidator } from "@hono/valibot-validator";
 import { Hono } from "hono";
+import type { Env } from "hono";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 import { valibotProblemHook } from "../../src/integrations/valibot.js";
@@ -22,6 +24,14 @@ function createApp(hookOptions?: Parameters<typeof valibotProblemHook>[0]) {
 }
 
 describe("valibotProblemHook", () => {
+	it("V8: return type is assignable to @hono/valibot-validator Hook type", () => {
+		const schema = v.object({ name: v.string() });
+		type Schema = typeof schema;
+		// This assignment must compile without `as never` cast
+		const hook: Hook<Schema, Env, string> = valibotProblemHook();
+		expect(typeof hook).toBe("function");
+	});
+
 	it("V1: passes through on validation success", async () => {
 		const app = createApp();
 		const res = await app.request("/users", {
