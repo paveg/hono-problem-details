@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.1.7
+
+### Patch Changes
+
+- [#73](https://github.com/paveg/hono-problem-details/pull/73) [`5635dc1`](https://github.com/paveg/hono-problem-details/commit/5635dc1834083c12e80b8c4a8d7b60291a32d73a) Thanks [@paveg](https://github.com/paveg)! - Make `valibotProblemHook()` generic to match `@hono/valibot-validator` Hook type, removing the need for `as never` cast
+
 ## 0.1.6
 
 ### Patch Changes
