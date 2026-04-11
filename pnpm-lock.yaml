@@ -54,7 +54,7 @@ importers:
         specifier: ^3.0.0
         version: 3.2.4(yaml@2.8.2)
       zod:
-        specifier: ^3.24.0
+        specifier: ^3.25.0
         version: 3.25.76
 
 packages:
