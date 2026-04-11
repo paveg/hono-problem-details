@@ -1,5 +1,26 @@
 # hono-problem-details
 
+## 0.1.8
+
+### Patch Changes
+
+- [#77](https://github.com/paveg/hono-problem-details/pull/77) [`7d985ca`](https://github.com/paveg/hono-problem-details/commit/7d985ca9f354eef5266cd98504ada4e11c636fda) Thanks [@paveg](https://github.com/paveg)! - Guard `problemDetailsHandler`'s `localize` callback against throws. A localize
+  function that threw would previously bubble out of the error handler and
+  re-enter Hono's `onError`, risking recursion. The handler now catches throws
+  and falls back to the un-localized problem details.
+
+- [#78](https://github.com/paveg/hono-problem-details/pull/78) [`8ec3f44`](https://github.com/paveg/hono-problem-details/commit/8ec3f44b0602d01d089b253a63cfe08d757543cc) Thanks [@paveg](https://github.com/paveg)! - `clampHttpStatus` now requires an integer via `Number.isInteger`. Previously
+  strings, floats, and BigInts could slip through the 200–599 range check via
+  JavaScript type coercion, producing undefined behavior in stricter fetch
+  runtimes. Non-integer or out-of-range values now fall back to 500.
+
+- [#79](https://github.com/paveg/hono-problem-details/pull/79) [`81300f5`](https://github.com/paveg/hono-problem-details/commit/81300f5007987d9d335f10218ef39f6b28a9fa4f) Thanks [@paveg](https://github.com/paveg)! - Validator hooks (`zod`, `valibot`, `standard-schema`) now strip C0 control
+  characters (`\x00`–`\x1f`) and DEL (`\x7f`) from `field` and `message` in the
+  `errors[]` array before serialization. This prevents log-line spoofing via
+  BEL / backspace / similar controls embedded in user-supplied field names.
+  Bidi/format controls (`U+202E` etc.) are intentionally left intact to avoid
+  breaking legitimate i18n content.
+
 ## 0.1.7
 
 ### Patch Changes
