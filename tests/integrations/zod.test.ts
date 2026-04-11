@@ -114,6 +114,29 @@ describe("zodProblemHook", () => {
 		expect(body.errors[0].field).toBe("");
 	});
 
+	it("Z9: strips C0 control characters from field and message", async () => {
+		const app = new Hono();
+		const fieldName = "name\x01ctrl";
+		const schema = z.object({
+			[fieldName]: z.string({ message: "required\x07bell" }),
+		});
+		app.post("/ctrl", zValidator("json", schema, zodProblemHook()), (c) => c.text("ok"));
+		const res = await app.request("/ctrl", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({}),
+		});
+		expect(res.status).toBe(422);
+		const body = (await res.json()) as { errors: { field: string; message: string }[] };
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: assertion target
+		const ctrlRe = /[\x00-\x1f\x7f]/;
+		for (const err of body.errors) {
+			expect(err.field).not.toMatch(ctrlRe);
+			expect(err.message).not.toMatch(ctrlRe);
+		}
+		expect(body.errors.some((e) => e.field.includes("namectrl"))).toBe(true);
+	});
+
 	it("Z7: allows custom title and detail via options", async () => {
 		const app = createApp({
 			title: "Custom Validation Error",
