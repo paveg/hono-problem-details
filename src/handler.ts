@@ -21,7 +21,12 @@ function toResponse(
 	let pd = normalizeProblemDetails(input);
 
 	if (options.localize) {
-		pd = { ...pd, ...options.localize(pd, c) };
+		try {
+			pd = { ...pd, ...options.localize(pd, c) };
+		} catch {
+			// Fall through with the un-localized pd. A throwing localize must not
+			// cause the error handler itself to throw — that would re-enter onError.
+		}
 	}
 
 	c.set("problemDetails", pd);

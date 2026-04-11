@@ -514,4 +514,62 @@ describe("problemDetailsHandler", () => {
 			expect(res.status).toBe(status);
 		}
 	});
+
+	it("H35: localize throwing Error falls back to un-localized response", async () => {
+		const app = createApp({
+			localize: () => {
+				throw new Error("boom");
+			},
+		});
+		app.get("/", () => {
+			throw problemDetails({
+				status: 400,
+				title: "Bad Request",
+				detail: "original detail",
+			});
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(400);
+		const body = await res.json();
+		expect(body.title).toBe("Bad Request");
+		expect(body.detail).toBe("original detail");
+		expect(JSON.stringify(body)).not.toContain("boom");
+	});
+
+	it("H36: localize throwing non-Error value falls back to un-localized response", async () => {
+		const app = createApp({
+			localize: () => {
+				throw "string thrown";
+			},
+		});
+		app.get("/", () => {
+			throw problemDetails({
+				status: 400,
+				title: "Bad Request",
+				detail: "original detail",
+			});
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(400);
+		const body = await res.json();
+		expect(body.title).toBe("Bad Request");
+		expect(body.detail).toBe("original detail");
+	});
+
+	it("H37: localize returning normally still applies (regression guard)", async () => {
+		const app = createApp({
+			localize: (pd) => ({ ...pd, title: "Localized" }),
+		});
+		app.get("/", () => {
+			throw problemDetails({
+				status: 400,
+				title: "Bad Request",
+				detail: "original detail",
+			});
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(400);
+		const body = await res.json();
+		expect(body.title).toBe("Localized");
+	});
 });
