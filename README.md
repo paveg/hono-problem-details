@@ -10,9 +10,25 @@
 
 Returns `application/problem+json` structured error responses with a single `app.onError` setup.
 
+## Why hono-problem-details?
+
+Without a contract, HTTP error bodies drift. Every Hono project ends up reinventing the same
+scaffolding — and every client ends up parsing whatever shows up.
+
+- **Inconsistent shapes** across routes: `{ message }`, `{ error }`, `{ code, reason }`, or raw text
+- **Validation errors** from each schema library return a different format, so clients special-case each
+- **OpenAPI drift**: docs describe one error shape, the server returns another
+- **No standard for extensions**: adding `retryAfter` or `correlationId` means breaking your own contract
+
+[RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html) defines one structure — `{ type, status, title,
+detail, instance }` plus arbitrary extension members — and this middleware makes it the default for every
+error in your Hono app: thrown `ProblemDetailsError`, `HTTPException`, validation failures, and unhandled
+exceptions alike. One `app.onError()` line, one contract your clients, OpenAPI spec, and integration tests
+can all agree on.
+
 ## Features
 
-- **RFC 9457 compliant** — standard 5 fields + extension members
+- **RFC 9457 compliant** — `type`, `status`, `title`, `detail`, `instance` + extension members (flattened per §3.1, standard fields always win)
 - **Hono native** — `app.onError` handler with RFC-compliant defaults
 - **Zod integration** — `@hono/zod-validator` hook for validation errors
 - **Valibot integration** — `@hono/valibot-validator` hook for validation errors
@@ -55,21 +71,84 @@ app.get("/not-found", (c) => {
 // }
 ```
 
-## Throwing Problem Details
+## Patterns
+
+Common error shapes for day-to-day API work. Validation errors are covered separately by the
+[Zod](#zod-validator-integration) / [Valibot](#valibot-validator-integration) / [Standard Schema](#standard-schema-integration)
+hooks — this section is for errors you throw yourself.
 
 ```ts
 import { problemDetails } from "hono-problem-details";
+```
 
-app.post("/orders", (c) => {
-  throw problemDetails({
-    status: 409,
-    title: "Conflict",
-    detail: `Order ${id} already exists`,
-    type: "https://api.example.com/problems/order-conflict",
-    instance: `/orders/${id}`,
-  });
+### Unauthorized — 401
+
+```ts
+throw problemDetails({
+  status: 401,
+  title: "Unauthorized",
+  detail: "Missing or invalid credentials",
+  type: "https://api.example.com/problems/unauthorized",
 });
 ```
+
+Clients key off `type` to trigger a re-auth flow — no need to parse `detail`.
+
+### Forbidden — 403
+
+```ts
+throw problemDetails({
+  status: 403,
+  title: "Forbidden",
+  detail: `User ${userId} cannot access resource ${resourceId}`,
+  type: "https://api.example.com/problems/forbidden",
+  extensions: { requiredRole: "admin" },
+});
+```
+
+### Not Found — 404
+
+```ts
+throw problemDetails({
+  status: 404,
+  title: "Not Found",
+  detail: `Order ${orderId} does not exist`,
+  instance: `/orders/${orderId}`,
+});
+```
+
+`instance` points at the specific occurrence — clients can use it as a key for retry logic
+or deduplication.
+
+### Conflict — 409
+
+```ts
+throw problemDetails({
+  status: 409,
+  title: "Order Conflict",
+  detail: `Order ${orderId} already exists`,
+  type: "https://api.example.com/problems/order-conflict",
+  instance: `/orders/${orderId}`,
+});
+```
+
+Domain conflicts should always carry a project-specific `type` URI. `about:blank` is fine for
+generic 4xx/5xx but loses its value the moment a client needs to distinguish two conflicts.
+
+### Too Many Requests — 429
+
+```ts
+throw problemDetails({
+  status: 429,
+  title: "Too Many Requests",
+  detail: "Request quota exceeded",
+  type: "https://api.example.com/problems/rate-limited",
+  extensions: { retryAfter: 60, quota: 1000, remaining: 0 },
+});
+```
+
+Rate-limit metadata goes in `extensions` — clients read it straight from the body instead
+of juggling `Retry-After` headers.
 
 ## Extension Members
 
@@ -128,6 +207,16 @@ throw problems.create("RATE_LIMITED", {
   extensions: { retryAfter: 60 },
 });
 ```
+
+### When to use the registry vs `problemDetails()`
+
+Reach for `createProblemTypeRegistry` when your API has a fixed set of domain errors and you
+want one source of truth for `type` / `status` / `title`. It pays off the moment the same error
+is thrown from more than one handler — renames and URI changes happen in one place.
+
+Use `problemDetails()` directly for one-off errors, prototypes, or generic 4xx/5xx where
+`about:blank` is the right `type`. RFC 9457 explicitly allows `about:blank` when the HTTP status
+code alone is enough context — don't force a URI just to have one.
 
 ## Zod Validator Integration
 
@@ -258,6 +347,16 @@ problemDetailsHandler({
 ```
 
 The callback receives the fully-built `ProblemDetails` object and the Hono `Context`, allowing access to headers like `Accept-Language`. Return a new `ProblemDetails` with translated fields.
+
+> **Note on caching**: If your responses vary by `Accept-Language`, add `Vary: Accept-Language`
+> from your own middleware so CDNs and browser caches don't serve the wrong translation.
+> This middleware intentionally does not set `Vary` — error handlers shouldn't mutate
+> request-scope headers that also apply to successful responses.
+
+> **Note on failures**: If your `localize` callback throws, the handler falls back to the
+> un-localized `ProblemDetails` and continues. Throwing from inside `app.onError` would cause
+> the error handler to re-enter itself, so the swallow is deliberate. Catch errors inside your
+> callback if you need to observe them.
 
 ## Handler Options
 
