@@ -7,16 +7,25 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Tokyo"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 15
     reviewers:
       - "paveg"
     labels:
       - "dependencies"
     groups:
+      # Bundle only minor/patch updates so they ship as one PR each.
+      # Major bumps fall through and get one PR per package — each
+      # major is independent risk and deserves independent review.
       dev-dependencies:
         dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
       production-dependencies:
         dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
     ignore:
       # Never auto-bump peer dep majors — those are coordinated with users
       - dependency-name: "hono"
