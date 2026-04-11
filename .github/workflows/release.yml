@@ -18,7 +18,15 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
+    # Defense-in-depth: the workflow_run trigger's `branches: [main]` filter only
+    # restricts the head branch of the triggering CI run. A CI run started by a
+    # `pull_request` event can still satisfy that filter, so we must also require
+    # the triggering event to be `push` and the head branch to be literally `main`
+    # before exposing NPM_TOKEN / id-token.
+    if: >-
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
         with:
