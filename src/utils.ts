@@ -20,9 +20,9 @@ export function sanitizeExtensions(
 	return filtered ?? extensions;
 }
 
-/** Clamp HTTP status to 200-599 range; returns 500 for out-of-range values */
+/** Clamp HTTP status to 200-599 integer range; returns 500 for out-of-range or non-integer values */
 export function clampHttpStatus(status: number): number {
-	return status >= 200 && status <= 599 ? status : 500;
+	return Number.isInteger(status) && status >= 200 && status <= 599 ? status : 500;
 }
 
 const FALLBACK_BODY = JSON.stringify({

@@ -69,6 +69,26 @@ describe("clampHttpStatus", () => {
 	])("U8: clamps %d to 500", (input, expected) => {
 		expect(clampHttpStatus(input)).toBe(expected);
 	});
+
+	it("U21: returns 500 for non-integer float", () => {
+		expect(clampHttpStatus(200.5)).toBe(500);
+	});
+
+	it("U22: returns 500 for numeric string", () => {
+		expect(clampHttpStatus("200" as unknown as number)).toBe(500);
+	});
+
+	it("U23: returns 500 for BigInt", () => {
+		expect(clampHttpStatus(200n as unknown as number)).toBe(500);
+	});
+
+	it("U24: returns 500 for NaN", () => {
+		expect(clampHttpStatus(Number.NaN)).toBe(500);
+	});
+
+	it("U25: returns 500 for Infinity", () => {
+		expect(clampHttpStatus(Number.POSITIVE_INFINITY)).toBe(500);
+	});
 });
 
 describe("normalizeProblemDetails", () => {
