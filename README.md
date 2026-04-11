@@ -13,13 +13,13 @@ Returns `application/problem+json` structured error responses with a single `app
 ## Features
 
 - **RFC 9457 compliant** — standard 5 fields + extension members
-- **Hono native** — `app.onError` handler + `createMiddleware()` patterns
+- **Hono native** — `app.onError` handler with RFC-compliant defaults
 - **Zod integration** — `@hono/zod-validator` hook for validation errors
 - **Valibot integration** — `@hono/valibot-validator` hook for validation errors
 - **OpenAPI integration** — `@hono/zod-openapi` schemas for API documentation
 - **Standard Schema** — `@hono/standard-validator` hook (works with any schema library)
 - **Type-safe** — full TypeScript support with inference
-- **Zero external dependencies** — only `hono` as peer dependency
+- **Zero runtime dependencies** — `hono` is the only required peer dependency; validator integrations are optional
 - **Localization** — `localize` callback for title/detail translation
 - **Edge-first** — works on Cloudflare Workers, Deno, Bun, and Node.js
 
@@ -33,6 +33,7 @@ npm install hono-problem-details
 
 ```ts
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { problemDetailsHandler } from "hono-problem-details";
 
 const app = new Hono();
