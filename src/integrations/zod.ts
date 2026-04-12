@@ -16,6 +16,10 @@ function formatErrors(zodError: ZodError): ValidationError[] {
 	}));
 }
 
+/**
+ * Create a `@hono/zod-validator` hook that returns RFC 9457 Problem Details
+ * on validation failure (422 Unprocessable Content with `errors` extension).
+ */
 export function zodProblemHook(
 	options?: ValidationHookOptions,
 ): (

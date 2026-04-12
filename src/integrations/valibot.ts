@@ -16,6 +16,10 @@ function formatIssues(issues: BaseIssue<unknown>[]): ValidationError[] {
 	}));
 }
 
+/**
+ * Create a `@hono/valibot-validator` hook that returns RFC 9457 Problem Details
+ * on validation failure (422 Unprocessable Content with `errors` extension).
+ */
 export function valibotProblemHook<T extends GenericSchema | GenericSchemaAsync = GenericSchema>(
 	options?: ValidationHookOptions,
 ): (result: SafeParseResult<T> & { target: string }, c: Context) => Response | undefined {

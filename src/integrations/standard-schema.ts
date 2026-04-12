@@ -21,6 +21,11 @@ function formatIssues(issues: readonly StandardSchemaV1.Issue[]): ValidationErro
 	}));
 }
 
+/**
+ * Create a `@hono/standard-validator` hook that returns RFC 9457 Problem Details
+ * on validation failure (422 Unprocessable Content with `errors` extension).
+ * Works with any Standard Schema-compatible library (Zod, Valibot, ArkType, etc.).
+ */
 export function standardSchemaProblemHook(
 	options?: ValidationHookOptions,
 ): (
