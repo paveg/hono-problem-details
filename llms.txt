@@ -1,0 +1,197 @@
+# hono-problem-details
+
+> RFC 9457 Problem Details middleware for Hono. Returns `application/problem+json`
+> structured error responses with a single `app.onError()` setup.
+
+This file is an LLM-focused quick reference. For the full documentation see the
+[README](https://github.com/paveg/hono-problem-details#readme).
+
+## When to use
+
+- Your Hono API needs a consistent error response format across all routes
+- Clients (mobile apps, SDKs, TypeScript clients) parse error responses programmatically
+- You document errors in OpenAPI and want server responses to match the spec
+- You need typed error categories for domain errors (conflict, rate limit, auth)
+
+## Setup
+
+```ts
+import { Hono } from "hono";
+import { problemDetailsHandler } from "hono-problem-details";
+
+const app = new Hono();
+
+app.onError(problemDetailsHandler());
+```
+
+Every thrown error — `ProblemDetailsError`, Hono's `HTTPException`, validation failures,
+and unhandled exceptions — is returned as `application/problem+json; charset=utf-8`.
+
+## Throwing errors
+
+Use `problemDetails()` for inline throws. Fill in `type` with a project-specific URI
+when clients need to distinguish sub-categories of the same HTTP status; otherwise leave
+`type` unset and the default `"about:blank"` will be used.
+
+```ts
+import { problemDetails } from "hono-problem-details";
+
+// 401 Unauthorized
+throw problemDetails({
+  status: 401,
+  title: "Unauthorized",
+  detail: "Missing or invalid credentials",
+  type: "https://api.example.com/problems/unauthorized",
+});
+
+// 403 Forbidden with extension metadata
+throw problemDetails({
+  status: 403,
+  title: "Forbidden",
+  detail: `User ${userId} cannot access ${resourceId}`,
+  type: "https://api.example.com/problems/forbidden",
+  extensions: { requiredRole: "admin" },
+});
+
+// 404 Not Found with instance URI
+throw problemDetails({
+  status: 404,
+  title: "Not Found",
+  detail: `Order ${orderId} does not exist`,
+  instance: `/orders/${orderId}`,
+});
+
+// 409 Conflict (domain error)
+throw problemDetails({
+  status: 409,
+  title: "Order Conflict",
+  detail: `Order ${orderId} already exists`,
+  type: "https://api.example.com/problems/order-conflict",
+  instance: `/orders/${orderId}`,
+});
+
+// 429 Too Many Requests with rate-limit metadata
+throw problemDetails({
+  status: 429,
+  title: "Too Many Requests",
+  detail: "Request quota exceeded",
+  type: "https://api.example.com/problems/rate-limited",
+  extensions: { retryAfter: 60, quota: 1000, remaining: 0 },
+});
+```
+
+Use `createProblemTypeRegistry()` when the same error is thrown from multiple handlers
+and you want one source of truth for `type` / `status` / `title`:
+
+```ts
+import { createProblemTypeRegistry } from "hono-problem-details";
+
+const problems = createProblemTypeRegistry({
+  ORDER_CONFLICT: {
+    type: "https://api.example.com/problems/order-conflict",
+    status: 409,
+    title: "Order Conflict",
+  },
+  RATE_LIMITED: {
+    type: "https://api.example.com/problems/rate-limited",
+    status: 429,
+    title: "Too Many Requests",
+  },
+});
+
+throw problems.create("ORDER_CONFLICT", {
+  detail: `Order ${orderId} already exists`,
+  instance: `/orders/${orderId}`,
+});
+```
+
+## Validation errors
+
+Validation errors are automatically converted to 422 Unprocessable Content with an
+`errors` extension member. Use the matching hook for your schema library:
+
+```ts
+// Zod
+import { zValidator } from "@hono/zod-validator";
+import { zodProblemHook } from "hono-problem-details/zod";
+
+app.post("/users", zValidator("json", schema, zodProblemHook()), handler);
+
+// Valibot
+import { vValidator } from "@hono/valibot-validator";
+import { valibotProblemHook } from "hono-problem-details/valibot";
+
+app.post("/users", vValidator("json", schema, valibotProblemHook()), handler);
+
+// Any Standard Schema library (Zod, Valibot, ArkType, etc.)
+import { sValidator } from "@hono/standard-validator";
+import { standardSchemaProblemHook } from "hono-problem-details/standard-schema";
+
+app.post("/users", sValidator("json", schema, standardSchemaProblemHook()), handler);
+```
+
+Validation error response shape:
+
+```json
+{
+  "type": "about:blank",
+  "status": 422,
+  "title": "Validation Error",
+  "detail": "Request validation failed",
+  "errors": [
+    { "field": "email", "message": "Invalid email", "code": "invalid_string" }
+  ]
+}
+```
+
+## Response shape (RFC 9457)
+
+```json
+{
+  "type": "https://api.example.com/problems/order-conflict",
+  "status": 409,
+  "title": "Order Conflict",
+  "detail": "Order abc-123 already exists",
+  "instance": "/orders/abc-123",
+  "retryAfter": 60
+}
+```
+
+Standard fields:
+
+- `type` — URI identifying the problem type. Use `"about:blank"` (default) when the HTTP
+  status alone is sufficient context
+- `status` — HTTP status code, 200–599 (clamped to 500 if invalid)
+- `title` — short human-readable summary, stable across occurrences
+- `detail` — specific to this occurrence, may include dynamic values
+- `instance` — URI identifying this specific occurrence
+
+Extension members (e.g. `retryAfter` in the example above) are passed via the
+`extensions` field on the input, and are flattened to the top level of the response body
+per RFC 9457 §3.1.
+
+Content-Type: `application/problem+json; charset=utf-8`
+
+## Rules and gotchas
+
+- **Don't force a `type` URI for every error.** RFC 9457 allows `"about:blank"` when the
+  HTTP status is enough context. Force a project-specific URI only when clients need to
+  distinguish sub-categories (e.g. two different 409 conflicts).
+- **Extensions are flattened, not nested.** Passing `extensions: { foo: 1 }` puts
+  `"foo": 1` at the top level of the response, not nested under `"extensions"`.
+- **Extension keys cannot override standard fields.** If you pass
+  `extensions: { status: 999 }`, it is silently dropped — standard `status` always wins.
+- **Prototype pollution keys are stripped.** `__proto__`, `constructor`, and `prototype`
+  are removed from extension members before serialization.
+- **`Accept-Language` responses need `Vary`.** If you use the `localize` option, add
+  `Vary: Accept-Language` from your own middleware. This library does not set it.
+- **`localize` throws are swallowed.** If your `localize` callback throws, the handler
+  falls back to the un-localized `ProblemDetails`. Throwing from inside `app.onError`
+  would cause re-entry, so this is deliberate. Catch errors inside your callback if you
+  need to observe them.
+
+## See also
+
+- [README](https://github.com/paveg/hono-problem-details#readme) — full API reference, Handler Options, OpenAPI integration
+- [ADRs](https://github.com/paveg/hono-problem-details/tree/main/docs/adr) — design decisions
+- [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html) — Problem Details for HTTP APIs specification
