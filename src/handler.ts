@@ -34,6 +34,19 @@ function toResponse(
 	return buildProblemResponse(pd);
 }
 
+/**
+ * Create an `app.onError` handler that returns RFC 9457 Problem Details responses.
+ * Handles {@link ProblemDetailsError}, Hono `HTTPException`, and unhandled exceptions.
+ *
+ * @example
+ * ```ts
+ * import { Hono } from "hono";
+ * import { problemDetailsHandler } from "hono-problem-details";
+ *
+ * const app = new Hono();
+ * app.onError(problemDetailsHandler());
+ * ```
+ */
 export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}): ErrorHandler {
 	return (error, c) => {
 		if (error instanceof ProblemDetailsError) {

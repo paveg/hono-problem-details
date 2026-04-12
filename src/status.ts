@@ -52,10 +52,12 @@ const STATUS_SLUGS: Record<number, string> = Object.fromEntries(
 	]),
 );
 
+/** Look up the standard HTTP reason phrase for a status code (e.g. 404 → `"Not Found"`). */
 export function statusToPhrase(status: number): string | undefined {
 	return STATUS_PHRASES[status];
 }
 
+/** Look up a URL-safe slug for a status code (e.g. 404 → `"not-found"`). Used by the `typePrefix` handler option. */
 export function statusToSlug(status: number): string | undefined {
 	return STATUS_SLUGS[status];
 }
