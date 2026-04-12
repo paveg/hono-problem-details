@@ -66,11 +66,12 @@
 			"standard-schema": ["./dist/integrations/standard-schema.d.ts"]
 		}
 	},
-	"files": ["dist"],
+	"files": ["dist", "!dist/**/*.map"],
 	"sideEffects": false,
 	"scripts": {
 		"build": "tsup",
 		"test": "vitest run",
+		"bench": "vitest bench",
 		"test:watch": "vitest",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
@@ -98,6 +99,7 @@
 	"bugs": "https://github.com/paveg/hono-problem-details/issues",
 	"license": "MIT",
 	"author": "Ryota Ikezawa",
+	"funding": "https://github.com/sponsors/paveg",
 	"peerDependencies": {
 		"@hono/standard-validator": "^0.2.0",
 		"@hono/valibot-validator": "^0.6.0",
