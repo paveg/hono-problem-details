@@ -134,7 +134,7 @@
 		}
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^1.9.0",
+		"@biomejs/biome": "^2.4.11",
 		"@changesets/changelog-github": "0.6.0",
 		"@changesets/cli": "2.30.0",
 		"@hono/standard-validator": "0.2.2",
