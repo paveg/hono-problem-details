@@ -399,6 +399,7 @@ The following Hono middleware libraries use `hono-problem-details` as an optiona
 
 - [hono-idempotency](https://github.com/paveg/hono-idempotency) — Idempotency key middleware for Hono
 - [hono-webhook-verify](https://github.com/paveg/hono-webhook-verify) — Webhook signature verification middleware for Hono
+- [hono-cf-access](https://github.com/paveg/hono-cf-access) — Country / ASN blocking and maintenance mode via Cloudflare Workers `request.cf`
 
 ## License
 
