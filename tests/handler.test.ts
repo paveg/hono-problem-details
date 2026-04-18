@@ -474,7 +474,7 @@ describe("problemDetailsHandler", () => {
 
 	it("H32: localize returning partial fields preserves other fields", async () => {
 		const app = createApp({
-			localize: () => ({ title: "Localized Title" }) as never,
+			localize: () => ({ title: "Localized Title" }),
 		});
 		app.get("/", () => {
 			throw new HTTPException(404, { message: "Not found" });
@@ -571,5 +571,73 @@ describe("problemDetailsHandler", () => {
 		expect(res.status).toBe(400);
 		const body = await res.json();
 		expect(body.title).toBe("Localized");
+	});
+
+	it("H38: autoInstance populates instance from request path for ProblemDetailsError", async () => {
+		const app = createApp({ autoInstance: true });
+		app.get("/orders/:id", (c) => {
+			throw problemDetails({ status: 404, title: "Not Found" });
+		});
+		const res = await app.request("/orders/123");
+		const body = await res.json();
+		expect(body.instance).toBe("/orders/123");
+	});
+
+	it("H39: autoInstance populates instance for HTTPException", async () => {
+		const app = createApp({ autoInstance: true });
+		app.get("/users/:id", () => {
+			throw new HTTPException(403, { message: "Forbidden" });
+		});
+		const res = await app.request("/users/42");
+		const body = await res.json();
+		expect(body.instance).toBe("/users/42");
+	});
+
+	it("H40: autoInstance populates instance for unhandled Error", async () => {
+		const app = createApp({ autoInstance: true });
+		app.get("/crash", () => {
+			throw new Error("boom");
+		});
+		const res = await app.request("/crash");
+		const body = await res.json();
+		expect(body.instance).toBe("/crash");
+	});
+
+	it("H41: autoInstance does not overwrite explicit instance", async () => {
+		const app = createApp({ autoInstance: true });
+		app.get("/orders/:id", () => {
+			throw problemDetails({
+				status: 404,
+				title: "Not Found",
+				instance: "urn:order:123",
+			});
+		});
+		const res = await app.request("/orders/123");
+		const body = await res.json();
+		expect(body.instance).toBe("urn:order:123");
+	});
+
+	it("H42: autoInstance default is off (no instance populated)", async () => {
+		const app = createApp();
+		app.get("/orders/:id", () => {
+			throw problemDetails({ status: 404, title: "Not Found" });
+		});
+		const res = await app.request("/orders/123");
+		const body = await res.json();
+		expect(body.instance).toBeUndefined();
+	});
+
+	it("H43: autoInstance populated value is visible to localize callback", async () => {
+		const app = createApp({
+			autoInstance: true,
+			localize: (pd) => ({ detail: `at ${pd.instance}` }),
+		});
+		app.get("/orders/:id", () => {
+			throw problemDetails({ status: 404, title: "Not Found" });
+		});
+		const res = await app.request("/orders/7");
+		const body = await res.json();
+		expect(body.detail).toBe("at /orders/7");
+		expect(body.instance).toBe("/orders/7");
 	});
 });
