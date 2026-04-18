@@ -1,5 +1,22 @@
 # hono-problem-details
 
+## 0.3.0
+
+### Minor Changes
+
+- [`d7f2dda`](https://github.com/paveg/hono-problem-details/commit/d7f2dda059e1911d5c2fc000d233f7bcbc0b567a) Thanks [@paveg](https://github.com/paveg)! - Add `autoInstance` handler option and widen `localize` return type to accept partial patches.
+
+  - **`problemDetailsHandler({ autoInstance: true })`** populates `instance` from `c.req.path`
+    when the thrown problem did not specify one. Opt-in to avoid silently changing response
+    shape for existing consumers; explicit `instance` values always win.
+  - **`localize` callback** may now return `Partial<ProblemDetails> | undefined` instead of
+    the full object. This aligns the TypeScript type with the existing runtime behaviour
+    (`{ ...pd, ...localize(pd, c) }`). Returning the full object still works; existing
+    callbacks compile unchanged.
+  - README: documents the `title`-from-status auto-fill (unchanged runtime behaviour) and the
+    new `autoInstance` shortcut so callers stop hand-writing `title`/`instance` for stock
+    HTTP semantics.
+
 ## 0.2.1
 
 ### Patch Changes
