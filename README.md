@@ -388,7 +388,10 @@ problemDetailsHandler({
 
   // Localize title/detail before sending the response.
   // Return a partial patch — fields you omit fall through from the original.
-  localize: (pd, c) => ({ title: `[${lang}] ${pd.title}` }),
+  localize: (pd, c) => {
+    const lang = c.req.header("Accept-Language") ?? "en";
+    return { title: `[${lang}] ${pd.title}` };
+  },
 
   // Custom error mapping
   mapError: (error) => {
