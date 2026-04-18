@@ -42,8 +42,18 @@ export interface ProblemDetailsHandlerOptions {
 	defaultType?: string;
 	/** Include stack trace in detail (for development) */
 	includeStack?: boolean;
+	/**
+	 * When `true`, populate `instance` from the request path (`c.req.path`) if
+	 * the thrown problem didn't specify one. Explicit values always win.
+	 * Default: `false` — opt-in to avoid silently changing response shape.
+	 */
+	autoInstance?: boolean;
 	/** Custom error to ProblemDetails mapping */
 	mapError?: (error: Error) => ProblemDetailsInput | undefined;
-	/** Localize title/detail before sending the response */
-	localize?: (pd: ProblemDetails, c: Context) => ProblemDetails;
+	/**
+	 * Localize title/detail before sending the response.
+	 * Returned fields are merged onto the original ProblemDetails, so callers may
+	 * return a partial patch (e.g. `{ title: "..." }`) or omit the return entirely.
+	 */
+	localize?: (pd: ProblemDetails, c: Context) => Partial<ProblemDetails> | undefined;
 }

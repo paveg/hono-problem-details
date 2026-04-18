@@ -125,6 +125,11 @@ throw problemDetails({
 `instance` points at the specific occurrence — clients can use it as a key for retry logic
 or deduplication.
 
+> **Auto-fill shortcuts.** `title` is optional — when omitted, the standard HTTP reason phrase
+> for `status` is used (`404` → `"Not Found"`). Similarly, `instance` can be populated from
+> the request path automatically via `problemDetailsHandler({ autoInstance: true })`. Both
+> shortcuts skip the boilerplate in the example above; explicit values always win.
+
 ### Conflict — 409
 
 ```ts
@@ -337,14 +342,16 @@ const errorWithExtensions = createProblemDetailsSchema(
 
 ## Localization
 
-Use the `localize` callback to translate `title` and `detail` based on the request context:
+Use the `localize` callback to translate `title` and `detail` based on the request context.
+Return a partial patch with just the fields you want to override — everything else falls
+through unchanged. Returning nothing (or `undefined`) leaves the response untouched.
 
 ```ts
 problemDetailsHandler({
   localize: (pd, c) => {
     const lang = c.req.header("Accept-Language");
     if (lang?.startsWith("ja")) {
-      return { ...pd, title: translate("ja", pd.title) };
+      return { title: translate("ja", pd.title) };
     }
     return pd;
   },
@@ -376,8 +383,15 @@ problemDetailsHandler({
   // Include stack trace in detail (for development)
   includeStack: process.env.NODE_ENV === "development",
 
-  // Localize title/detail before sending the response
-  localize: (pd, c) => ({ ...pd, title: `[${lang}] ${pd.title}` }),
+  // Populate `instance` from `c.req.path` when the thrown problem didn't specify one
+  autoInstance: true,
+
+  // Localize title/detail before sending the response.
+  // Return a partial patch — fields you omit fall through from the original.
+  localize: (pd, c) => {
+    const lang = c.req.header("Accept-Language") ?? "en";
+    return { title: `[${lang}] ${pd.title}` };
+  },
 
   // Custom error mapping
   mapError: (error) => {

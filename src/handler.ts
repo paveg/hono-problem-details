@@ -20,6 +20,10 @@ function toResponse(
 ): Response {
 	let pd = normalizeProblemDetails(input);
 
+	if (options.autoInstance && pd.instance === undefined) {
+		pd = { ...pd, instance: c.req.path };
+	}
+
 	if (options.localize) {
 		try {
 			pd = { ...pd, ...options.localize(pd, c) };
