@@ -40,7 +40,12 @@ export interface ProblemDetailsHandlerOptions {
 	typePrefix?: string;
 	/** Default type URI. Defaults to "about:blank" */
 	defaultType?: string;
-	/** Include stack trace in detail (for development) */
+	/**
+	 * Include the stack trace on unhandled `Error` responses (500). The stack is
+	 * emitted as a top-level `stack` extension member per RFC 9457 §3.1 flattening,
+	 * not in `detail`, to prevent leakage into UIs that render `detail` verbatim.
+	 * Development-only.
+	 */
 	includeStack?: boolean;
 	/**
 	 * When `true`, populate `instance` from the request path (`c.req.path`) if
