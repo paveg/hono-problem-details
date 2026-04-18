@@ -44,7 +44,7 @@ describe("problemDetailsHandler", () => {
 		expect(body.detail).toBe("Forbidden");
 	});
 
-	it("H3: converts generic Error to 500 Problem Details", async () => {
+	it("H3: converts generic Error to 500 Problem Details with safe detail", async () => {
 		const app = createApp();
 		app.get("/", () => {
 			throw new Error("Something broke");
@@ -55,6 +55,8 @@ describe("problemDetailsHandler", () => {
 		expect(body.type).toBe("about:blank");
 		expect(body.status).toBe(500);
 		expect(body.title).toBe("Internal Server Error");
+		expect(body.detail).toBe("An unexpected error occurred");
+		expect(body.detail).not.toContain("Something broke");
 	});
 
 	it("H4: uses typePrefix to build type URI", async () => {
@@ -77,25 +79,29 @@ describe("problemDetailsHandler", () => {
 		expect(body.type).toBe("about:blank");
 	});
 
-	it("H6: includes stack trace in detail when includeStack is true", async () => {
+	it("H6: exposes stack in extensions.stack (not detail) when includeStack is true", async () => {
 		const app = createApp({ includeStack: true });
 		app.get("/", () => {
 			throw new Error("Debug error");
 		});
 		const res = await app.request("/");
 		const body = await res.json();
-		expect(body.detail).toContain("Debug error");
-		expect(body.detail).toContain("at");
+		expect(body.stack).toContain("Debug error");
+		expect(body.stack).toContain("at");
+		expect(body.detail).toBe("An unexpected error occurred");
+		expect(body.detail).not.toContain("Debug error");
 	});
 
-	it("H7: excludes stack trace by default", async () => {
+	it("H7: excludes stack trace by default; detail stays user-safe", async () => {
 		const app = createApp();
 		app.get("/", () => {
 			throw new Error("Secret error");
 		});
 		const res = await app.request("/");
 		const body = await res.json();
-		expect(body.detail).toBeUndefined();
+		expect(body.detail).toBe("An unexpected error occurred");
+		expect(body.detail).not.toContain("Secret error");
+		expect(body.stack).toBeUndefined();
 	});
 
 	it("H8: uses mapError custom mapping", async () => {

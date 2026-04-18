@@ -380,7 +380,7 @@ problemDetailsHandler({
   // Default type URI (default: "about:blank")
   defaultType: "about:blank",
 
-  // Include stack trace in detail (for development)
+  // Include stack trace in `extensions.stack` on 500 responses (development only)
   includeStack: process.env.NODE_ENV === "development",
 
   // Populate `instance` from `c.req.path` when the thrown problem didn't specify one
