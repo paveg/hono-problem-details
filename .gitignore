@@ -5,3 +5,4 @@ coverage/
 .DS_Store
 .npmrc
 .envrc
+.claude/settings.local.json
