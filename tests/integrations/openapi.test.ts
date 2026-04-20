@@ -47,10 +47,28 @@ describe("ProblemDetailsSchema", () => {
 		}
 	});
 
-	it("O5: has OpenAPI metadata", () => {
-		const metadata = ProblemDetailsSchema._def.openapi?.metadata;
-		expect(metadata).toBeDefined();
-		expect(metadata?.title).toBe("ProblemDetails");
+	it("O5: emits 'ProblemDetails' title in generated OpenAPI schema", () => {
+		const app = new OpenAPIHono();
+		app.openapi(
+			createRoute({
+				method: "get",
+				path: "/err",
+				responses: { 400: problemDetailsResponse(400) },
+			}),
+			// biome-ignore lint/suspicious/noExplicitAny: required by OpenAPIHono typing
+			(c) => c.json({} as any, 400),
+		);
+		const doc = app.getOpenAPI31Document({
+			openapi: "3.1.0",
+			info: { title: "Test", version: "1.0.0" },
+		});
+		const schema = (
+			(doc.paths?.["/err"]?.get?.responses?.["400"] as Record<string, unknown>)?.content as Record<
+				string,
+				{ schema: Record<string, unknown> }
+			>
+		)?.["application/problem+json"]?.schema;
+		expect(schema?.title).toBe("ProblemDetails");
 	});
 });
 
@@ -95,16 +113,31 @@ describe("createProblemDetailsSchema", () => {
 		}
 	});
 
-	it("O8: extension schema preserves OpenAPI metadata", () => {
-		const schema = createProblemDetailsSchema(
+	it("O8: extension schema preserves 'ProblemDetails' title in generated doc", () => {
+		const customSchema = createProblemDetailsSchema(
 			z.object({
 				retryAfter: z.number(),
 			}),
 		);
-
-		const metadata = schema._def.openapi?.metadata;
-		expect(metadata).toBeDefined();
-		expect(metadata?.title).toBe("ProblemDetails");
+		const app = new OpenAPIHono();
+		app.openapi(
+			createRoute({
+				method: "get",
+				path: "/retry",
+				responses: { 429: problemDetailsResponse(429, undefined, customSchema) },
+			}),
+			// biome-ignore lint/suspicious/noExplicitAny: required by OpenAPIHono typing
+			(c) => c.json({} as any, 429),
+		);
+		const doc = app.getOpenAPI31Document({
+			openapi: "3.1.0",
+			info: { title: "Test", version: "1.0.0" },
+		});
+		const schema = (
+			(doc.paths?.["/retry"]?.get?.responses?.["429"] as Record<string, unknown>)
+				?.content as Record<string, { schema: Record<string, unknown> }>
+		)?.["application/problem+json"]?.schema;
+		expect(schema?.title).toBe("ProblemDetails");
 	});
 });
 

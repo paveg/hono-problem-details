@@ -29,8 +29,8 @@ export const ProblemDetailsSchema: z.ZodObject<{
  */
 export function createProblemDetailsSchema<T extends z.ZodRawShape>(
 	extensions: z.ZodObject<T>,
-): z.AnyZodObject {
-	return ProblemDetailsSchema.merge(extensions).openapi({ title: "ProblemDetails" });
+): z.ZodObject {
+	return ProblemDetailsSchema.extend(extensions.shape).openapi({ title: "ProblemDetails" });
 }
 
 /**
@@ -40,9 +40,9 @@ export function createProblemDetailsSchema<T extends z.ZodRawShape>(
 export function problemDetailsResponse(
 	status: number,
 	description?: string,
-	schema: z.ZodTypeAny = ProblemDetailsSchema,
+	schema: z.ZodType = ProblemDetailsSchema,
 ): {
-	content: { "application/problem+json": { schema: z.ZodTypeAny } };
+	content: { "application/problem+json": { schema: z.ZodType } };
 	description: string;
 } {
 	return {
