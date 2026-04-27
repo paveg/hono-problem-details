@@ -160,6 +160,49 @@ throw problemDetails({
 Rate-limit metadata goes in `extensions` — clients read it straight from the body instead
 of juggling `Retry-After` headers.
 
+## Unhandled Errors — 500
+
+Anything thrown that isn't a `ProblemDetailsError` or `HTTPException` (and isn't matched by
+`mapError`) becomes a generic 500. `detail` is **always** the constant string
+`"An unexpected error occurred"` — never the raw `error.message` or stack — so UIs that
+render `detail` verbatim cannot leak server internals.
+
+```ts
+app.get("/boom", () => {
+  throw new Error("DB connection lost: ECONNREFUSED");
+});
+
+// HTTP/1.1 500 Internal Server Error
+// Content-Type: application/problem+json
+// {
+//   "type": "about:blank",
+//   "status": 500,
+//   "title": "Internal Server Error",
+//   "detail": "An unexpected error occurred"
+// }
+```
+
+In development, set `includeStack: true` to surface the stack trace as a top-level `stack`
+extension member. `detail` stays constant either way — read the stack from `body.stack`:
+
+```ts
+problemDetailsHandler({
+  includeStack: process.env.NODE_ENV !== "production",
+});
+
+// HTTP/1.1 500 Internal Server Error
+// {
+//   "type": "about:blank",
+//   "status": 500,
+//   "title": "Internal Server Error",
+//   "detail": "An unexpected error occurred",
+//   "stack": "Error: DB connection lost: ECONNREFUSED\n    at ..."
+// }
+```
+
+Keep `includeStack` off in production — stack traces should not leave the server even via
+opt-in extension fields.
+
 ## Extension Members
 
 Extension members are flattened to top level per RFC 9457:
@@ -295,6 +338,11 @@ app.post("/users", sValidator("json", schema, standardSchemaProblemHook()), (c) 
 ```
 
 ## OpenAPI Integration
+
+> **Peer dependencies**: `./openapi` requires `@hono/zod-openapi@^1.0.0`, which in turn
+> requires `zod@^4.0.0`. The base `./zod` integration (validator hook) works with both
+> `zod@^3.25.0` and `zod@^4.0.0` — the version constraint above only applies when you import
+> from `hono-problem-details/openapi`.
 
 Use with `@hono/zod-openapi` to document Problem Details error responses in your OpenAPI spec:
 
