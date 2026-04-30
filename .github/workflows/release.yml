@@ -33,7 +33,9 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
         with:
-          node-version: 22
+          # Node 24 ships with npm 11.x (required for OIDC Trusted Publishing).
+          # Node 22 ships with npm 10.x and self-upgrading via 'npm install -g npm@latest' is unreliable in CI.
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
       - name: Enable corepack
         run: corepack enable
@@ -54,8 +56,6 @@ jobs:
           version: pnpm version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Set ci-pass status on Version Packages PR
         if: steps.changesets.outputs.pullRequestNumber
         env:
