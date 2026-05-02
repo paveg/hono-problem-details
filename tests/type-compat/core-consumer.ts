@@ -12,6 +12,14 @@ import {
 	statusToPhrase,
 	statusToSlug,
 } from "../../dist/index.js";
+import {
+	createProblemDetailsSchema,
+	ProblemDetailsSchema,
+	problemDetailsResponse,
+} from "../../dist/integrations/openapi.js";
+import { standardSchemaProblemHook } from "../../dist/integrations/standard-schema.js";
+import { valibotProblemHook } from "../../dist/integrations/valibot.js";
+import { zodProblemHook } from "../../dist/integrations/zod.js";
 
 const _ct: typeof PROBLEM_JSON_CONTENT_TYPE = PROBLEM_JSON_CONTENT_TYPE;
 
@@ -56,6 +64,13 @@ const _registryError: ProblemDetailsError = _registry.create("ORDER_CONFLICT", {
 const _phrase: string | undefined = statusToPhrase(404);
 const _slug: string | undefined = statusToSlug(404);
 
+const _zodHook = zodProblemHook();
+const _valibotHook = valibotProblemHook();
+const _standardHook = standardSchemaProblemHook();
+const _problemSchema = ProblemDetailsSchema;
+const _problemSchemaFactory = createProblemDetailsSchema;
+const _problemResponse = problemDetailsResponse;
+
 void _ct;
 void _problem;
 void _input;
@@ -67,3 +82,9 @@ void _registry;
 void _registryError;
 void _phrase;
 void _slug;
+void _zodHook;
+void _valibotHook;
+void _standardHook;
+void _problemSchema;
+void _problemSchemaFactory;
+void _problemResponse;
