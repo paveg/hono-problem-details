@@ -50,6 +50,12 @@ can all agree on.
 npm install hono-problem-details
 ```
 
+### Requirements
+
+- Hono `>= 4.12.14` (peer dependency)
+- TypeScript `>= 5.0` — the published `.d.ts` files are CI-tested against TS 5.0, 5.4, 5.7, and 5.9. Older TS versions may work but are not verified.
+- Node.js `>= 20`
+
 ## Quick Start
 
 ```ts

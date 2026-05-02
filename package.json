@@ -88,6 +88,7 @@
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
+		"test:compat": "tsc -p tsconfig.compat.json",
 		"release": "pnpm build && changeset publish",
 		"version-packages": "changeset version && pnpm lint:fix"
 	},
