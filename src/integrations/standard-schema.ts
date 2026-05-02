@@ -1,9 +1,9 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type { Context } from "hono";
 import {
+	buildValidationResponse,
 	type ValidationError,
 	type ValidationHookOptions,
-	buildValidationResponse,
 } from "./validation.js";
 
 export type { ValidationHookOptions as StandardSchemaProblemHookOptions };

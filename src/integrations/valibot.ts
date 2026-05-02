@@ -1,9 +1,9 @@
 import type { Context } from "hono";
 import type { BaseIssue, GenericSchema, GenericSchemaAsync, SafeParseResult } from "valibot";
 import {
+	buildValidationResponse,
 	type ValidationError,
 	type ValidationHookOptions,
-	buildValidationResponse,
 } from "./validation.js";
 
 export type { ValidationHookOptions as ValibotProblemHookOptions };

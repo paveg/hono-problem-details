@@ -1,7 +1,7 @@
 import type { Hook } from "@hono/valibot-validator";
 import { vValidator } from "@hono/valibot-validator";
-import { Hono } from "hono";
 import type { Env } from "hono";
+import { Hono } from "hono";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 import { valibotProblemHook } from "../../src/integrations/valibot.js";

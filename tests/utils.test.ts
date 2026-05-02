@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-	PROBLEM_JSON_CONTENT_TYPE,
 	buildProblemResponse,
 	clampHttpStatus,
 	normalizeProblemDetails,
+	PROBLEM_JSON_CONTENT_TYPE,
 	safeStringify,
 	sanitizeExtensions,
 } from "../src/utils.js";

@@ -1,9 +1,9 @@
 import type { Context } from "hono";
 import type { ZodError } from "zod";
 import {
+	buildValidationResponse,
 	type ValidationError,
 	type ValidationHookOptions,
-	buildValidationResponse,
 } from "./validation.js";
 
 export type { ValidationHookOptions as ZodProblemHookOptions };

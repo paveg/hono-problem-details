@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { describe, expect, it } from "vitest";
-import { ProblemDetailsError } from "../src/error.js";
 import { problemDetails } from "../src/factory.js";
 import { problemDetailsHandler } from "../src/handler.js";
 
@@ -194,7 +193,7 @@ describe("problemDetailsHandler", () => {
 
 	it("H12: localize callback transforms ProblemDetails before response", async () => {
 		const app = createApp({
-			localize: (pd, c) => ({
+			localize: (pd, _c) => ({
 				...pd,
 				title: `[ja] ${pd.title}`,
 				detail: pd.detail ? `[ja] ${pd.detail}` : undefined,
@@ -581,7 +580,7 @@ describe("problemDetailsHandler", () => {
 
 	it("H38: autoInstance populates instance from request path for ProblemDetailsError", async () => {
 		const app = createApp({ autoInstance: true });
-		app.get("/orders/:id", (c) => {
+		app.get("/orders/:id", (_c) => {
 			throw problemDetails({ status: 404, title: "Not Found" });
 		});
 		const res = await app.request("/orders/123");

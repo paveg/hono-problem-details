@@ -1,9 +1,9 @@
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { describe, expect, it } from "vitest";
 import { problemDetailsHandler } from "../../src/handler.js";
 import {
-	ProblemDetailsSchema,
 	createProblemDetailsSchema,
+	ProblemDetailsSchema,
 	problemDetailsResponse,
 } from "../../src/integrations/openapi.js";
 
