@@ -19,16 +19,16 @@ importers:
         version: 2.31.0
       '@hono/standard-validator':
         specifier: 0.2.2
-        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.15)
+        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.16)
       '@hono/valibot-validator':
         specifier: ^0.6.1
-        version: 0.6.1(hono@4.12.15)(valibot@1.3.1(typescript@6.0.3))
+        version: 0.6.1(hono@4.12.16)(valibot@1.3.1(typescript@6.0.3))
       '@hono/zod-openapi':
         specifier: 1.3.0
-        version: 1.3.0(hono@4.12.15)(zod@4.3.6)
+        version: 1.3.0(hono@4.12.16)(zod@4.4.2)
       '@hono/zod-validator':
         specifier: ^0.7.6
-        version: 0.7.6(hono@4.12.15)(zod@4.3.6)
+        version: 0.7.6(hono@4.12.16)(zod@4.4.2)
       '@standard-schema/spec':
         specifier: 1.1.0
         version: 1.1.0
@@ -37,7 +37,7 @@ importers:
         version: 3.2.4(vitest@3.2.4(yaml@2.8.2))
       hono:
         specifier: ^4.12.14
-        version: 4.12.15
+        version: 4.12.16
       lefthook:
         specifier: 2.1.6
         version: 2.1.6
@@ -55,7 +55,7 @@ importers:
         version: 3.2.4(yaml@2.8.2)
       zod:
         specifier: ^4.0.0
-        version: 4.3.6
+        version: 4.4.2
 
 packages:
 
@@ -877,8 +877,8 @@ packages:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
-  hono@4.12.15:
-    resolution: {integrity: sha512-qM0jDhFEaCBb4TxoW7f53Qrpv9RBiayUHo0S52JudprkhvpjIrGoU1mnnr29Fvd1U335ZFPZQY1wlkqgfGXyLg==}
+  hono@4.12.16:
+    resolution: {integrity: sha512-jN0ZewiNAWSe5khM3EyCmBb250+b40wWbwNILNfEvq84VREWwOIkuUsFONk/3i3nqkz7Oe1PcpM2mwQEK2L9Kg==}
     engines: {node: '>=16.9.0'}
 
   html-escaper@2.0.2:
@@ -1507,8 +1507,8 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+  zod@4.4.2:
+    resolution: {integrity: sha512-IynmDyxsEsb9RKzO3J9+4SxXnl2FTFSzNBaKKaMV6tsSk0rw9gYw9gs+JFCq/qk2LCZ78KDwyj+Z289TijSkUw==}
 
 snapshots:
 
@@ -1517,10 +1517,10 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
 
-  '@asteasolutions/zod-to-openapi@8.5.0(zod@4.3.6)':
+  '@asteasolutions/zod-to-openapi@8.5.0(zod@4.4.2)':
     dependencies:
       openapi3-ts: 4.5.0
-      zod: 4.3.6
+      zod: 4.4.2
 
   '@babel/helper-string-parser@7.27.1': {}
 
@@ -1810,28 +1810,28 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.15)':
+  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.16)':
     dependencies:
       '@standard-schema/spec': 1.1.0
-      hono: 4.12.15
+      hono: 4.12.16
 
-  '@hono/valibot-validator@0.6.1(hono@4.12.15)(valibot@1.3.1(typescript@6.0.3))':
+  '@hono/valibot-validator@0.6.1(hono@4.12.16)(valibot@1.3.1(typescript@6.0.3))':
     dependencies:
-      hono: 4.12.15
+      hono: 4.12.16
       valibot: 1.3.1(typescript@6.0.3)
 
-  '@hono/zod-openapi@1.3.0(hono@4.12.15)(zod@4.3.6)':
+  '@hono/zod-openapi@1.3.0(hono@4.12.16)(zod@4.4.2)':
     dependencies:
-      '@asteasolutions/zod-to-openapi': 8.5.0(zod@4.3.6)
-      '@hono/zod-validator': 0.7.6(hono@4.12.15)(zod@4.3.6)
-      hono: 4.12.15
+      '@asteasolutions/zod-to-openapi': 8.5.0(zod@4.4.2)
+      '@hono/zod-validator': 0.7.6(hono@4.12.16)(zod@4.4.2)
+      hono: 4.12.16
       openapi3-ts: 4.5.0
-      zod: 4.3.6
+      zod: 4.4.2
 
-  '@hono/zod-validator@0.7.6(hono@4.12.15)(zod@4.3.6)':
+  '@hono/zod-validator@0.7.6(hono@4.12.16)(zod@4.4.2)':
     dependencies:
-      hono: 4.12.15
-      zod: 4.3.6
+      hono: 4.12.16
+      zod: 4.4.2
 
   '@inquirer/external-editor@1.0.3':
     dependencies:
@@ -2281,7 +2281,7 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono@4.12.15: {}
+  hono@4.12.16: {}
 
   html-escaper@2.0.2: {}
 
@@ -2850,4 +2850,4 @@ snapshots:
 
   yaml@2.8.2: {}
 
-  zod@4.3.6: {}
+  zod@4.4.2: {}
