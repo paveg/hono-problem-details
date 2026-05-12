@@ -37,14 +37,23 @@ export function getProblemDetailsSchema(): z.ZodObject<ProblemDetailsShape> {
 	return _cached;
 }
 
+const STANDARD_FIELD_KEYS = new Set(["type", "status", "title", "detail", "instance"]);
+
 /**
  * Create a Problem Details schema with typed extension members.
- * Extensions are merged at top level per RFC 9457.
+ *
+ * Extensions are merged at top level per RFC 9457 §3.1, and **standard fields
+ * always win** over extension keys that collide (mirroring the runtime spread
+ * order in `problemDetails()`). Conflicting extension keys are silently
+ * dropped from the schema.
  */
 export function createProblemDetailsSchema<T extends z.ZodRawShape>(
 	extensions: z.ZodObject<T>,
 ): z.ZodObject {
-	return getProblemDetailsSchema().extend(extensions.shape).openapi({ title: "ProblemDetails" });
+	const safeShape = Object.fromEntries(
+		Object.entries(extensions.shape).filter(([key]) => !STANDARD_FIELD_KEYS.has(key)),
+	);
+	return getProblemDetailsSchema().extend(safeShape).openapi({ title: "ProblemDetails" });
 }
 
 /**

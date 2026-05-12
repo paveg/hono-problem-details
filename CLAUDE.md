@@ -47,7 +47,9 @@ pnpm build             # tsup (ESM + CJS dual output)
 
 ## Key Conventions
 
-- **Extensions spread order**: `{ ...extensions, ...standard }` — standard fields always win over extensions (RFC 9457 Section 3.1)
+- **Standard fields always win over extensions** (RFC 9457 §3.1). Enforce in both layers:
+  - Runtime factory (`problemDetails()`): spread as `{ ...extensions, ...standard }` so the standard properties land last
+  - OpenAPI schema (`createProblemDetailsSchema()`): filter standard field keys out of the extension shape before `.extend()` — Zod's `.extend()` would otherwise let conflicting keys replace standard fields
 - **Subpath exports**: Each integration is a separate entry point (`./zod`, `./valibot`, `./openapi`, `./standard-schema`)
 - **External deps**: All peer dependencies must be listed in `tsup.config.ts` `external` array to prevent bundling
 - **No runtime dependencies**: Only `hono` as peer dependency. All integrations are optional peer deps.
