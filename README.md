@@ -356,8 +356,8 @@ Use with `@hono/zod-openapi` to document Problem Details error responses in your
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { problemDetailsHandler } from "hono-problem-details";
 import {
-  ProblemDetailsSchema,
   createProblemDetailsSchema,
+  getProblemDetailsSchema,
   problemDetailsResponse,
 } from "hono-problem-details/openapi";
 
@@ -385,6 +385,9 @@ const route = createRoute({
   },
 });
 
+// Need the schema itself? Call the factory:
+const ProblemDetailsSchema = getProblemDetailsSchema();
+
 // With extension members
 const errorWithExtensions = createProblemDetailsSchema(
   z.object({
@@ -393,6 +396,13 @@ const errorWithExtensions = createProblemDetailsSchema(
 );
 // Use: problemDetailsResponse(422, "Validation Error", errorWithExtensions)
 ```
+
+> **Migrating from v0.6.x**: `ProblemDetailsSchema` (the const export) was removed
+> in v0.7.0. Replace `import { ProblemDetailsSchema }` with
+> `import { getProblemDetailsSchema }` and call it where you previously read
+> the const. The factory is memoized — repeat calls return the same instance.
+> See [ADR-0004](./docs/adr/0004-defer-openapi-schema-construction-via-factory.md)
+> for the bundler-related reason this changed.
 
 ## Localization
 
