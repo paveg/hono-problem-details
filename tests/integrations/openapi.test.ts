@@ -113,6 +113,39 @@ describe("createProblemDetailsSchema", () => {
 		}
 	});
 
+	it("O16: extension keys conflicting with RFC 9457 standard fields are ignored (standard wins)", () => {
+		// CLAUDE.md: "Extensions spread order: { ...extensions, ...standard } —
+		// standard fields always win over extensions (RFC 9457 Section 3.1)".
+		// The runtime factory (problemDetails()) enforces this via spread order;
+		// the OpenAPI schema must enforce the same invariant at schema build time.
+		const schema = createProblemDetailsSchema(
+			z.object({
+				// Conflicting key: would otherwise replace `status: z.number().int()`.
+				status: z.string(),
+				// Non-conflicting extension key remains.
+				traceId: z.string(),
+			}),
+		);
+
+		// Standard `status` is still a number — extension's z.string() did not win.
+		const numericOk = schema.safeParse({
+			type: "about:blank",
+			status: 500,
+			title: "Server Error",
+			traceId: "abc",
+		});
+		expect(numericOk.success).toBe(true);
+
+		// Strings fail because the standard z.number().int() is preserved.
+		const stringFails = schema.safeParse({
+			type: "about:blank",
+			status: "not-a-number",
+			title: "Server Error",
+			traceId: "abc",
+		});
+		expect(stringFails.success).toBe(false);
+	});
+
 	it("O8: extension schema preserves 'ProblemDetails' title in generated doc", () => {
 		const customSchema = createProblemDetailsSchema(
 			z.object({
