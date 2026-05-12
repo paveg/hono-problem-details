@@ -14,7 +14,7 @@ import {
 } from "../../dist/index.js";
 import {
 	createProblemDetailsSchema,
-	ProblemDetailsSchema,
+	getProblemDetailsSchema,
 	problemDetailsResponse,
 } from "../../dist/integrations/openapi.js";
 import { standardSchemaProblemHook } from "../../dist/integrations/standard-schema.js";
@@ -67,7 +67,7 @@ const _slug: string | undefined = statusToSlug(404);
 const _zodHook = zodProblemHook();
 const _valibotHook = valibotProblemHook();
 const _standardHook = standardSchemaProblemHook();
-const _problemSchema = ProblemDetailsSchema;
+const _problemSchema = getProblemDetailsSchema();
 const _problemSchemaFactory = createProblemDetailsSchema;
 const _problemResponse = problemDetailsResponse;
 

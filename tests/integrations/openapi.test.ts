@@ -3,13 +3,13 @@ import { describe, expect, it } from "vitest";
 import { problemDetailsHandler } from "../../src/handler.js";
 import {
 	createProblemDetailsSchema,
-	ProblemDetailsSchema,
+	getProblemDetailsSchema,
 	problemDetailsResponse,
 } from "../../src/integrations/openapi.js";
 
-describe("ProblemDetailsSchema", () => {
+describe("getProblemDetailsSchema", () => {
 	it("O1: has RFC 9457 standard fields", () => {
-		const shape = ProblemDetailsSchema.shape;
+		const shape = getProblemDetailsSchema().shape;
 		expect(shape.type).toBeDefined();
 		expect(shape.status).toBeDefined();
 		expect(shape.title).toBeDefined();
@@ -18,7 +18,7 @@ describe("ProblemDetailsSchema", () => {
 	});
 
 	it("O2: validates a valid Problem Details object", () => {
-		const result = ProblemDetailsSchema.safeParse({
+		const result = getProblemDetailsSchema().safeParse({
 			type: "about:blank",
 			status: 404,
 			title: "Not Found",
@@ -27,7 +27,7 @@ describe("ProblemDetailsSchema", () => {
 	});
 
 	it("O3: status is required", () => {
-		const result = ProblemDetailsSchema.safeParse({
+		const result = getProblemDetailsSchema().safeParse({
 			type: "about:blank",
 			title: "Error",
 		});
@@ -35,7 +35,7 @@ describe("ProblemDetailsSchema", () => {
 	});
 
 	it("O4: detail and instance are optional", () => {
-		const result = ProblemDetailsSchema.safeParse({
+		const result = getProblemDetailsSchema().safeParse({
 			type: "about:blank",
 			status: 400,
 			title: "Bad Request",
@@ -169,9 +169,9 @@ describe("problemDetailsResponse", () => {
 		expect(response.content["application/problem+json"].schema).toBe(customSchema);
 	});
 
-	it("O12: uses ProblemDetailsSchema as default schema", () => {
+	it("O12: default schema is the memoized factory result", () => {
 		const response = problemDetailsResponse(500);
-		expect(response.content["application/problem+json"].schema).toBe(ProblemDetailsSchema);
+		expect(response.content["application/problem+json"].schema).toBe(getProblemDetailsSchema());
 	});
 
 	it("O15: falls back to 'Error' for unknown status code", () => {
@@ -181,7 +181,7 @@ describe("problemDetailsResponse", () => {
 });
 
 describe("OpenAPI integration E2E", () => {
-	it("O13: ProblemDetailsSchema works in createRoute response", async () => {
+	it("O13: getProblemDetailsSchema() works in createRoute response", async () => {
 		const app = new OpenAPIHono();
 		app.onError(problemDetailsHandler());
 
