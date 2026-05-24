@@ -3,7 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import { ProblemDetailsError } from "./error.js";
 import { statusToPhrase, statusToSlug } from "./status.js";
 import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.js";
-import { buildProblemResponse, normalizeProblemDetails } from "./utils.js";
+import { buildProblemResponse, getTraceId, normalizeProblemDetails } from "./utils.js";
 
 function buildType(status: number, options: ProblemDetailsHandlerOptions): string {
 	if (options.typePrefix) {
@@ -22,6 +22,13 @@ function toResponse(
 
 	if (options.autoInstance && pd.instance === undefined) {
 		pd = { ...pd, instance: c.req.path };
+	}
+
+	if (options.includeTraceId !== false && pd.traceId === undefined) {
+		const traceId = getTraceId();
+		if (traceId) {
+			pd.traceId = traceId;
+		}
 	}
 
 	if (options.localize) {

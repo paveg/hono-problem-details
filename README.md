@@ -43,6 +43,7 @@ can all agree on.
 - **Zero runtime dependencies** — `hono` is the only required peer dependency; validator integrations are optional
 - **Localization** — `localize` callback for title/detail translation
 - **Edge-first** — works on Cloudflare Workers, Deno, Bun, and Node.js
+- **OpenTelemetry support** — when instrumentation is enabled the traceId is automatically included using `@opentelemetry/api`. 
 
 ## Install
 
@@ -449,6 +450,9 @@ problemDetailsHandler({
 
   // Populate `instance` from `c.req.path` when the thrown problem didn't specify one
   autoInstance: true,
+
+  // Include OpenTelemetry traceId in the `traceId` field when instrumentation is enabled.
+  includeTraceId: true,
 
   // Localize title/detail before sending the response.
   // Return a partial patch — fields you omit fall through from the original.

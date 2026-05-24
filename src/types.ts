@@ -15,6 +15,8 @@ export interface ProblemDetails<T extends Record<string, unknown> = Record<strin
 	detail?: string;
 	/** URI that identifies the specific occurrence */
 	instance?: string;
+	/** Optional trace ID for correlating with server logs */
+	traceId?: string;
 	/** RFC 9457 extension members (flattened to top level on serialization) */
 	extensions?: T;
 }
@@ -29,6 +31,7 @@ export interface ProblemDetailsInput<T extends Record<string, unknown> = Record<
 	title?: string;
 	detail?: string;
 	instance?: string;
+	traceId?: string;
 	extensions?: T;
 }
 
@@ -53,6 +56,12 @@ export interface ProblemDetailsHandlerOptions {
 	 * Default: `false` — opt-in to avoid silently changing response shape.
 	 */
 	autoInstance?: boolean;
+	/**
+	 * Include a trace ID from the opentelemetry context (if available) as a `traceId` extension member.
+	 * Useful for correlating client-reported problems with server logs.
+	 * Default: `true` if OpenTelemetry is enabled.
+	 */
+	includeTraceId?: boolean;
 	/** Custom error to ProblemDetails mapping */
 	mapError?: (error: Error) => ProblemDetailsInput | undefined;
 	/**
