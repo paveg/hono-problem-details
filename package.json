@@ -142,6 +142,9 @@
 		"@hono/standard-validator": {
 			"optional": true
 		},
+		"@opentelemetry/api": {
+			"optional": true
+		},
 		"@standard-schema/spec": {
 			"optional": true
 		}

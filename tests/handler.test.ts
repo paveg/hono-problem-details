@@ -1,22 +1,9 @@
-import * as api from "@opentelemetry/api";
+import type * as OTelApi from "@opentelemetry/api";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { describe, expect, it, vi } from "vitest";
 import { problemDetails } from "../src/factory.js";
 import { problemDetailsHandler } from "../src/handler.js";
-
-// Mock @opentelemetry/api for testing.
-vi.mock("@opentelemetry/api", () => {
-	const api = {
-		trace: {
-			getSpan: vi.fn(),
-		},
-		context: {
-			active: vi.fn(),
-		},
-	};
-	return api;
-});
 
 function createApp(options?: Parameters<typeof problemDetailsHandler>[0]) {
 	const app = new Hono();
@@ -661,12 +648,20 @@ describe("problemDetailsHandler", () => {
 	});
 
 	it("H44: automatically populates traceId from OpenTelemetry", async () => {
-		// @ts-expect-error -- mock getSpan to return a span with traceId
-		vi.mocked(api.trace.getSpan).mockReturnValue({
-			spanContext: vi.fn().mockReturnValue({ traceId: "test-trace-id" }),
-		});
+		const mockOTelApi: typeof OTelApi = {
+			// @ts-expect-error -- using a mock, not the real API
+			trace: {
+				getSpan: vi.fn().mockReturnValue({
+					spanContext: vi.fn().mockReturnValue({ traceId: "test-trace-id" }),
+				}),
+			},
+			// @ts-expect-error -- using a mock, not the real API
+			context: {
+				active: vi.fn(),
+			},
+		};
 
-		const app = createApp({ includeTraceId: true });
+		const app = createApp({ OTelApi: mockOTelApi });
 		app.get("/", () => {
 			throw new HTTPException(400);
 		});
@@ -675,8 +670,8 @@ describe("problemDetailsHandler", () => {
 		expect(body.traceId).toBe("test-trace-id");
 	});
 
-	it("H45: does not populate traceId when includeTraceId is false", async () => {
-		const app = createApp({ includeTraceId: false });
+	it("H45: does not populate traceId when OTelApi is not provided", async () => {
+		const app = createApp({ OTelApi: undefined });
 		app.get("/", () => {
 			throw new HTTPException(400);
 		});
@@ -686,9 +681,18 @@ describe("problemDetailsHandler", () => {
 	});
 
 	it("H46: does not populate traceId when no span is active", async () => {
-		vi.mocked(api.trace.getSpan).mockReturnValue(undefined);
+		const mockOTelApi: typeof OTelApi = {
+			// @ts-expect-error -- using a mock, not the real API
+			trace: {
+				getSpan: vi.fn().mockReturnValue(undefined),
+			},
+			// @ts-expect-error -- using a mock, not the real API
+			context: {
+				active: vi.fn(),
+			},
+		};
 
-		const app = createApp({ includeTraceId: true });
+		const app = createApp({ OTelApi: mockOTelApi });
 		app.get("/", () => {
 			throw new HTTPException(400);
 		});

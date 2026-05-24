@@ -435,6 +435,21 @@ The callback receives the fully-built `ProblemDetails` object and the Hono `Cont
 > the error handler to re-enter itself, so the swallow is deliberate. Catch errors inside your
 > callback if you need to observe them.
 
+## OpenTelemetry Integration
+
+To enable OpenTelemetry instrumentation in problem details responses, pass the OpenTelemetry API as an option to the handler:
+
+```ts
+import * as OTelApi from "@opentelemetry/api";
+
+problemDetailsHandler({
+  OTelApi,
+});
+```
+
+When enabled, the handler adds a `traceId` extension member to all problem details responses when a trace is active. 
+This allows clients to correlate errors with server-side traces for easier debugging.
+
 ## Handler Options
 
 ```ts
@@ -451,8 +466,8 @@ problemDetailsHandler({
   // Populate `instance` from `c.req.path` when the thrown problem didn't specify one
   autoInstance: true,
 
-  // Include OpenTelemetry traceId in the `traceId` field when instrumentation is enabled.
-  includeTraceId: true,
+  // Inject OpenTelemetry api to automatically add `traceId` field when instrumentation is enabled.
+  OTelApi: undefined,
 
   // Localize title/detail before sending the response.
   // Return a partial patch — fields you omit fall through from the original.

@@ -1,3 +1,4 @@
+import type * as OTelApi from "@opentelemetry/api";
 import type { Context } from "hono";
 
 /**
@@ -57,11 +58,19 @@ export interface ProblemDetailsHandlerOptions {
 	 */
 	autoInstance?: boolean;
 	/**
-	 * Include a trace ID from the opentelemetry context (if available) as a `traceId` extension member.
-	 * Useful for correlating client-reported problems with server logs.
-	 * Default: `true` if OpenTelemetry is enabled.
+	 * If the OpenTelemetry API is available, the handler will attempt to
+	 * include the current trace ID in the Problem Details response.
+	 *
+	 * To use this feature, pass the OpenTelemetry API as `OTelApi` in the options:
+	 *
+	 * ```ts
+	 * import * as api from "@opentelemetry/api";
+	 *
+	 * app.onError(problemDetailsHandler({
+	 *  OTelApi: api,
+	 * }));
 	 */
-	includeTraceId?: boolean;
+	OTelApi?: typeof OTelApi;
 	/** Custom error to ProblemDetails mapping */
 	mapError?: (error: Error) => ProblemDetailsInput | undefined;
 	/**

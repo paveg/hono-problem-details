@@ -24,8 +24,8 @@ function toResponse(
 		pd = { ...pd, instance: c.req.path };
 	}
 
-	if (options.includeTraceId !== false && pd.traceId === undefined) {
-		const traceId = getTraceId();
+	if (options.OTelApi && pd.traceId === undefined) {
+		const traceId = getTraceId(options.OTelApi);
 		if (traceId) {
 			pd.traceId = traceId;
 		}
