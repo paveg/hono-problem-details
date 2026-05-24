@@ -1,4 +1,4 @@
-import type * as OTelApi from "@opentelemetry/api";
+import type * as otelApi from "@opentelemetry/api";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { describe, expect, it, vi } from "vitest";
@@ -648,7 +648,7 @@ describe("problemDetailsHandler", () => {
 	});
 
 	it("H44: automatically populates traceId from OpenTelemetry", async () => {
-		const mockOTelApi: typeof OTelApi = {
+		const mockOtelApi: typeof otelApi = {
 			// @ts-expect-error -- using a mock, not the real API
 			trace: {
 				getSpan: vi.fn().mockReturnValue({
@@ -661,7 +661,7 @@ describe("problemDetailsHandler", () => {
 			},
 		};
 
-		const app = createApp({ OTelApi: mockOTelApi });
+		const app = createApp({ otelApi: mockOtelApi });
 		app.get("/", () => {
 			throw new HTTPException(400);
 		});
@@ -671,7 +671,7 @@ describe("problemDetailsHandler", () => {
 	});
 
 	it("H45: does not populate traceId when OTelApi is not provided", async () => {
-		const app = createApp({ OTelApi: undefined });
+		const app = createApp();
 		app.get("/", () => {
 			throw new HTTPException(400);
 		});
@@ -680,8 +680,34 @@ describe("problemDetailsHandler", () => {
 		expect(body.traceId).toBeUndefined();
 	});
 
-	it("H46: does not populate traceId when no span is active", async () => {
-		const mockOTelApi: typeof OTelApi = {
+	it("H46: does not populate traceId when it is set manually", async () => {
+		const mockOtelApi: typeof otelApi = {
+			// @ts-expect-error -- using a mock, not the real API
+			trace: {
+				getSpan: vi.fn().mockReturnValue({
+					spanContext: vi.fn().mockReturnValue({ traceId: "test-trace-id" }),
+				}),
+			},
+			// @ts-expect-error -- using a mock, not the real API
+			context: {
+				active: vi.fn(),
+			},
+		};
+
+		const app = createApp({
+			otelApi: mockOtelApi,
+			mapError: () => ({ status: 400, extensions: { traceId: "manual-trace-id" } }),
+		});
+		app.get("/", () => {
+			throw new HTTPException(400);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.traceId).toBe("manual-trace-id");
+	});
+
+	it("H47: does not populate traceId when no span is active", async () => {
+		const mockOtelApi: typeof otelApi = {
 			// @ts-expect-error -- using a mock, not the real API
 			trace: {
 				getSpan: vi.fn().mockReturnValue(undefined),
@@ -692,7 +718,18 @@ describe("problemDetailsHandler", () => {
 			},
 		};
 
-		const app = createApp({ OTelApi: mockOTelApi });
+		const app = createApp({ otelApi: mockOtelApi });
+		app.get("/", () => {
+			throw new HTTPException(400);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.traceId).toBeUndefined();
+	});
+
+	it("H47: Handles invalid otelApi gracefully without crashing", async () => {
+		// @ts-expect-error -- passing invalid otelApi
+		const app = createApp({ otelApi: {} });
 		app.get("/", () => {
 			throw new HTTPException(400);
 		});

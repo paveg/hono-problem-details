@@ -1,18 +1,5 @@
-import type * as OTelApi from "@opentelemetry/api";
 import { statusToPhrase } from "./status.js";
 import type { ProblemDetails, ProblemDetailsInput } from "./types.js";
-
-/**
- * Safely retrieve the current trace ID from OpenTelemetry, if available.
- */
-export function getTraceId(api: typeof OTelApi): string | undefined {
-	try {
-		const span = api.trace.getSpan(api.context.active());
-		return span?.spanContext().traceId;
-	} catch {
-		return undefined;
-	}
-}
 
 /** RFC 9457 media type: `application/problem+json; charset=utf-8`. */
 export const PROBLEM_JSON_CONTENT_TYPE = "application/problem+json; charset=utf-8";
@@ -55,7 +42,6 @@ export function normalizeProblemDetails<T extends Record<string, unknown>>(
 		title: input.title ?? statusToPhrase(input.status) ?? "Unknown Error",
 		detail: input.detail,
 		instance: input.instance,
-		traceId: input.traceId,
 		extensions: input.extensions,
 	};
 }

@@ -1,4 +1,4 @@
-import type * as OTelApi from "@opentelemetry/api";
+import type * as otelApi from "@opentelemetry/api";
 import type { Context } from "hono";
 
 /**
@@ -16,8 +16,6 @@ export interface ProblemDetails<T extends Record<string, unknown> = Record<strin
 	detail?: string;
 	/** URI that identifies the specific occurrence */
 	instance?: string;
-	/** Optional trace ID for correlating with server logs */
-	traceId?: string;
 	/** RFC 9457 extension members (flattened to top level on serialization) */
 	extensions?: T;
 }
@@ -32,7 +30,6 @@ export interface ProblemDetailsInput<T extends Record<string, unknown> = Record<
 	title?: string;
 	detail?: string;
 	instance?: string;
-	traceId?: string;
 	extensions?: T;
 }
 
@@ -61,16 +58,17 @@ export interface ProblemDetailsHandlerOptions {
 	 * If the OpenTelemetry API is available, the handler will attempt to
 	 * include the current trace ID in the Problem Details response.
 	 *
-	 * To use this feature, pass the OpenTelemetry API as `OTelApi` in the options:
+	 * To use this feature, pass the OpenTelemetry API as `otelApi` in the options:
 	 *
 	 * ```ts
 	 * import * as api from "@opentelemetry/api";
 	 *
 	 * app.onError(problemDetailsHandler({
-	 *  OTelApi: api,
+	 *  otelApi: api,
 	 * }));
+	 * ```
 	 */
-	OTelApi?: typeof OTelApi;
+	otelApi?: typeof otelApi;
 	/** Custom error to ProblemDetails mapping */
 	mapError?: (error: Error) => ProblemDetailsInput | undefined;
 	/**

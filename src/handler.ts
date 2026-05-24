@@ -1,9 +1,10 @@
 import type { Context, ErrorHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { ProblemDetailsError } from "./error.js";
+import { getOtelTraceId } from "./integrations/opentelemetry.js";
 import { statusToPhrase, statusToSlug } from "./status.js";
 import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.js";
-import { buildProblemResponse, getTraceId, normalizeProblemDetails } from "./utils.js";
+import { buildProblemResponse, normalizeProblemDetails } from "./utils.js";
 
 function buildType(status: number, options: ProblemDetailsHandlerOptions): string {
 	if (options.typePrefix) {
@@ -24,10 +25,14 @@ function toResponse(
 		pd = { ...pd, instance: c.req.path };
 	}
 
-	if (options.OTelApi && pd.traceId === undefined) {
-		const traceId = getTraceId(options.OTelApi);
+	if (options.otelApi && pd.extensions?.traceId === undefined) {
+		const traceId = getOtelTraceId(options.otelApi);
 		if (traceId) {
-			pd.traceId = traceId;
+			if (!pd.extensions) {
+				pd.extensions = {};
+			}
+
+			pd.extensions.traceId = traceId;
 		}
 	}
 
