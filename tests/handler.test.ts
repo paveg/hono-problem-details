@@ -727,7 +727,7 @@ describe("problemDetailsHandler", () => {
 		expect(body.traceId).toBeUndefined();
 	});
 
-	it("H47: Handles invalid otelApi gracefully without crashing", async () => {
+	it("H48: Handles invalid otelApi gracefully without crashing", async () => {
 		// @ts-expect-error -- passing invalid otelApi
 		const app = createApp({ otelApi: {} });
 		app.get("/", () => {
