@@ -466,9 +466,6 @@ problemDetailsHandler({
   // Populate `instance` from `c.req.path` when the thrown problem didn't specify one
   autoInstance: true,
 
-  // Inject OpenTelemetry api to automatically add `traceId` field when instrumentation is enabled.
-  otelApi: undefined,
-
   // Localize title/detail before sending the response.
   // Return a partial patch — fields you omit fall through from the original.
   localize: (pd, c) => {
