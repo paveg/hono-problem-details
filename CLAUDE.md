@@ -67,5 +67,4 @@ pnpm build             # tsup (ESM + CJS dual output)
 
 - Changesets for versioning (`pnpm changeset`)
 - GitHub Actions auto-creates "Version Packages" PR on main push
-- Merging that PR triggers `pnpm release` (build + publish to npm)
-- `NODE_AUTH_TOKEN` env var required for npm auth in CI
+- Merging that PR triggers `pnpm release` (build + publish to npm via OIDC Trusted Publishing)
