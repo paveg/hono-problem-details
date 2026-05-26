@@ -28,7 +28,7 @@ pnpm install
 3. **Write tests first** (TDD: Red → Green → Refactor)
 4. Implement the feature
 5. Ensure all checks pass: `pnpm typecheck && pnpm lint && pnpm test && pnpm build`
-6. Run `pnpm changeset` to create a changeset
+6. Add a changeset — either run `pnpm changeset` locally, or open the PR first and follow the link in the [changeset-bot](https://github.com/apps/changeset-bot) comment to add one from the web UI
 7. Submit a pull request
 
 ## Code Style

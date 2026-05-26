@@ -22,7 +22,7 @@ jobs:
     # restricts the head branch of the triggering CI run. A CI run started by a
     # `pull_request` event can still satisfy that filter, so we must also require
     # the triggering event to be `push` and the head branch to be literally `main`
-    # before exposing NPM_TOKEN / id-token.
+    # before exposing id-token.
     if: >-
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_branch == 'main' &&

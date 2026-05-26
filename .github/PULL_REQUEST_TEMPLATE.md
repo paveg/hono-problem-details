@@ -13,3 +13,6 @@
 - [ ] `pnpm typecheck` passes
 - [ ] `pnpm lint` passes
 - [ ] Changeset added (if user-facing change)
+      — run `pnpm changeset` locally, or use the
+      [changeset-bot](https://github.com/apps/changeset-bot)
+      comment that appears on this PR
