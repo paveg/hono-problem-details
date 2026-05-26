@@ -1,4 +1,4 @@
-import type { OtelApiLike } from "../types";
+import type { OtelApiLike } from "../types.js";
 
 /**
  * Safely retrieve the current trace ID from OpenTelemetry, if available.
