@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.8.1
+
+### Patch Changes
+
+- [#144](https://github.com/paveg/hono-problem-details/pull/144) [`e665882`](https://github.com/paveg/hono-problem-details/commit/e665882eb3b9d07e36be414d386b5cdfa39eb5cc) Thanks [@skornel02](https://github.com/skornel02)! - Add OpenTelemetry type compatibility test
+
 ## 0.8.0
 
 ### Minor Changes
