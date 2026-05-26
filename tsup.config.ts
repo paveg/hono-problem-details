@@ -21,5 +21,6 @@ export default defineConfig({
 		"valibot",
 		"@hono/standard-validator",
 		"@standard-schema/spec",
+		"@opentelemetry/api",
 	],
 });

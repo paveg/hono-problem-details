@@ -53,6 +53,21 @@ export interface ProblemDetailsHandlerOptions {
 	 * Default: `false` — opt-in to avoid silently changing response shape.
 	 */
 	autoInstance?: boolean;
+	/**
+	 * If the OpenTelemetry API is available, the handler will attempt to
+	 * include the current trace ID in the Problem Details response.
+	 *
+	 * To use this feature, pass the OpenTelemetry API as `otelApi` in the options:
+	 *
+	 * ```ts
+	 * import * as api from "@opentelemetry/api";
+	 *
+	 * app.onError(problemDetailsHandler({
+	 *  otelApi: api,
+	 * }));
+	 * ```
+	 */
+	otelApi?: OtelApiLike;
 	/** Custom error to ProblemDetails mapping */
 	mapError?: (error: Error) => ProblemDetailsInput | undefined;
 	/**
@@ -61,4 +76,13 @@ export interface ProblemDetailsHandlerOptions {
 	 * return a partial patch (e.g. `{ title: "..." }`) or omit the return entirely.
 	 */
 	localize?: (pd: ProblemDetails, c: Context) => Partial<ProblemDetails> | undefined;
+}
+
+export interface OtelApiLike {
+	trace: {
+		getSpan(context: unknown): { spanContext(): { traceId: string } } | undefined;
+	};
+	context: {
+		active(): unknown;
+	};
 }

@@ -38,9 +38,10 @@ can all agree on.
 - **Zod integration** — `@hono/zod-validator` hook for validation errors
 - **Valibot integration** — `@hono/valibot-validator` hook for validation errors
 - **OpenAPI integration** — `@hono/zod-openapi` schemas for API documentation
+- **OpenTelemetry integration** — `@opentelemetry/api` for automatically injecting trace information. 
 - **Standard Schema** — `@hono/standard-validator` hook (works with any schema library)
 - **Type-safe** — full TypeScript support with inference
-- **Zero runtime dependencies** — `hono` is the only required peer dependency; validator integrations are optional
+- **Zero runtime dependencies** — `hono` is the only required peer dependency; validation and opentelemetry integrations are optional
 - **Localization** — `localize` callback for title/detail translation
 - **Edge-first** — works on Cloudflare Workers, Deno, Bun, and Node.js
 
@@ -433,6 +434,21 @@ The callback receives the fully-built `ProblemDetails` object and the Hono `Cont
 > un-localized `ProblemDetails` and continues. Throwing from inside `app.onError` would cause
 > the error handler to re-enter itself, so the swallow is deliberate. Catch errors inside your
 > callback if you need to observe them.
+
+## OpenTelemetry Integration
+
+To enable OpenTelemetry instrumentation in problem details responses, pass the OpenTelemetry API as an option to the handler:
+
+```ts
+import * as otelApi from "@opentelemetry/api";
+
+problemDetailsHandler({
+  otelApi,
+});
+```
+
+When enabled, the handler adds a `traceId` extension member to all problem details responses when a trace is active. 
+This allows clients to correlate errors with server-side traces for easier debugging.
 
 ## Handler Options
 

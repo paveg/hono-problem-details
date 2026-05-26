@@ -1,6 +1,7 @@
 import type { Context, ErrorHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { ProblemDetailsError } from "./error.js";
+import { getOtelTraceId } from "./integrations/opentelemetry.js";
 import { statusToPhrase, statusToSlug } from "./status.js";
 import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.js";
 import { buildProblemResponse, normalizeProblemDetails } from "./utils.js";
@@ -22,6 +23,17 @@ function toResponse(
 
 	if (options.autoInstance && pd.instance === undefined) {
 		pd = { ...pd, instance: c.req.path };
+	}
+
+	if (options.otelApi && pd.extensions?.traceId === undefined) {
+		const traceId = getOtelTraceId(options.otelApi);
+		if (traceId) {
+			if (!pd.extensions) {
+				pd.extensions = {};
+			}
+
+			pd.extensions.traceId = traceId;
+		}
 	}
 
 	if (options.localize) {
