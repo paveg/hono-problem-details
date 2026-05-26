@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.8.0
+
+### Minor Changes
+
+- [#139](https://github.com/paveg/hono-problem-details/pull/139) [`a2c8a24`](https://github.com/paveg/hono-problem-details/commit/a2c8a249c72a5b9e112c82165b206860984751dc) Thanks [@skornel02](https://github.com/skornel02)! - OpenTelemetry integration — Automatic traceId injection into problem details response when OTel api is configured.
+
 ## 0.7.0
 
 ### Minor Changes
