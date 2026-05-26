@@ -1,4 +1,3 @@
-import type * as otelApi from "@opentelemetry/api";
 import type { Context } from "hono";
 
 /**
@@ -68,7 +67,7 @@ export interface ProblemDetailsHandlerOptions {
 	 * }));
 	 * ```
 	 */
-	otelApi?: typeof otelApi;
+	otelApi?: OtelApiLike;
 	/** Custom error to ProblemDetails mapping */
 	mapError?: (error: Error) => ProblemDetailsInput | undefined;
 	/**
@@ -77,4 +76,13 @@ export interface ProblemDetailsHandlerOptions {
 	 * return a partial patch (e.g. `{ title: "..." }`) or omit the return entirely.
 	 */
 	localize?: (pd: ProblemDetails, c: Context) => Partial<ProblemDetails> | undefined;
+}
+
+export interface OtelApiLike {
+	trace: {
+		getSpan(context: unknown): { spanContext(): { traceId: string } } | undefined;
+	};
+	context: {
+		active(): unknown;
+	};
 }

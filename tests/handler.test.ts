@@ -1,9 +1,9 @@
-import type * as otelApi from "@opentelemetry/api";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { describe, expect, it, vi } from "vitest";
 import { problemDetails } from "../src/factory.js";
 import { problemDetailsHandler } from "../src/handler.js";
+import type { OtelApiLike } from "../src/types.js";
 
 function createApp(options?: Parameters<typeof problemDetailsHandler>[0]) {
 	const app = new Hono();
@@ -648,14 +648,12 @@ describe("problemDetailsHandler", () => {
 	});
 
 	it("H44: automatically populates traceId from OpenTelemetry", async () => {
-		const mockOtelApi: typeof otelApi = {
-			// @ts-expect-error -- using a mock, not the real API
+		const mockOtelApi: OtelApiLike = {
 			trace: {
 				getSpan: vi.fn().mockReturnValue({
 					spanContext: vi.fn().mockReturnValue({ traceId: "test-trace-id" }),
 				}),
 			},
-			// @ts-expect-error -- using a mock, not the real API
 			context: {
 				active: vi.fn(),
 			},
@@ -681,14 +679,12 @@ describe("problemDetailsHandler", () => {
 	});
 
 	it("H46: does not populate traceId when it is set manually", async () => {
-		const mockOtelApi: typeof otelApi = {
-			// @ts-expect-error -- using a mock, not the real API
+		const mockOtelApi: OtelApiLike = {
 			trace: {
 				getSpan: vi.fn().mockReturnValue({
 					spanContext: vi.fn().mockReturnValue({ traceId: "test-trace-id" }),
 				}),
 			},
-			// @ts-expect-error -- using a mock, not the real API
 			context: {
 				active: vi.fn(),
 			},
@@ -707,12 +703,10 @@ describe("problemDetailsHandler", () => {
 	});
 
 	it("H47: does not populate traceId when no span is active", async () => {
-		const mockOtelApi: typeof otelApi = {
-			// @ts-expect-error -- using a mock, not the real API
+		const mockOtelApi: OtelApiLike = {
 			trace: {
 				getSpan: vi.fn().mockReturnValue(undefined),
 			},
-			// @ts-expect-error -- using a mock, not the real API
 			context: {
 				active: vi.fn(),
 			},
