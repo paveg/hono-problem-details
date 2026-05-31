@@ -30,6 +30,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - run: pnpm knip
       - run: pnpm typecheck
       - run: pnpm vitest run --coverage
       - run: pnpm build
