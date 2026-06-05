@@ -731,4 +731,29 @@ describe("problemDetailsHandler", () => {
 		const body = await res.json();
 		expect(body.traceId).toBeUndefined();
 	});
+
+	it("H49: adds traceId to existing extensions without clobbering them", async () => {
+		const mockOtelApi: OtelApiLike = {
+			trace: {
+				getSpan: vi.fn().mockReturnValue({
+					spanContext: vi.fn().mockReturnValue({ traceId: "test-trace-id" }),
+				}),
+			},
+			context: {
+				active: vi.fn(),
+			},
+		};
+
+		const app = createApp({
+			otelApi: mockOtelApi,
+			mapError: () => ({ status: 400, extensions: { requestId: "req-1" } }),
+		});
+		app.get("/", () => {
+			throw new HTTPException(400);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.requestId).toBe("req-1");
+		expect(body.traceId).toBe("test-trace-id");
+	});
 });
