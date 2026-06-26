@@ -19,16 +19,16 @@ importers:
         version: 2.31.0
       '@hono/standard-validator':
         specifier: 0.2.2
-        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.21)
+        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.27)
       '@hono/valibot-validator':
         specifier: ^0.6.1
-        version: 0.6.1(hono@4.12.21)(valibot@1.3.1(typescript@6.0.3))
+        version: 0.6.1(hono@4.12.27)(valibot@1.3.1(typescript@6.0.3))
       '@hono/zod-openapi':
         specifier: 1.3.0
-        version: 1.3.0(hono@4.12.21)(zod@4.4.2)
+        version: 1.3.0(hono@4.12.27)(zod@4.4.2)
       '@hono/zod-validator':
         specifier: ^0.7.6
-        version: 0.7.6(hono@4.12.21)(zod@4.4.2)
+        version: 0.7.6(hono@4.12.27)(zod@4.4.2)
       '@opentelemetry/api':
         specifier: ^1.0.0
         version: 1.9.1
@@ -39,8 +39,8 @@ importers:
         specifier: ^4.1.8
         version: 4.1.9(vitest@4.1.9)
       hono:
-        specifier: ^4.12.14
-        version: 4.12.21
+        specifier: ^4.12.27
+        version: 4.12.27
       knip:
         specifier: 6.14.2
         version: 6.14.2(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
@@ -1384,8 +1384,8 @@ packages:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
-  hono@4.12.21:
-    resolution: {integrity: sha512-uV63apnb0kyPtAUwoWgaGh9HyIFcv8lgmzPZSiTBQAFOFGIzka5EZ1dZocmGnn0XdX0+XTqJ6Tqv7selMuGLRQ==}
+  hono@4.12.27:
+    resolution: {integrity: sha512-1yrb/+w6HWQJrUCLkJ2IF5jNIPvvFkblV5RNOYl6bV+OA6p9GLcMpHFFGTosSvHvcAUibuUukRqhlYI4z32C7Q==}
     engines: {node: '>=16.9.0'}
 
   html-escaper@2.0.2:
@@ -2403,27 +2403,27 @@ snapshots:
   '@esbuild/win32-x64@0.27.7':
     optional: true
 
-  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.21)':
+  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.27)':
     dependencies:
       '@standard-schema/spec': 1.1.0
-      hono: 4.12.21
+      hono: 4.12.27
 
-  '@hono/valibot-validator@0.6.1(hono@4.12.21)(valibot@1.3.1(typescript@6.0.3))':
+  '@hono/valibot-validator@0.6.1(hono@4.12.27)(valibot@1.3.1(typescript@6.0.3))':
     dependencies:
-      hono: 4.12.21
+      hono: 4.12.27
       valibot: 1.3.1(typescript@6.0.3)
 
-  '@hono/zod-openapi@1.3.0(hono@4.12.21)(zod@4.4.2)':
+  '@hono/zod-openapi@1.3.0(hono@4.12.27)(zod@4.4.2)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 8.5.0(zod@4.4.2)
-      '@hono/zod-validator': 0.7.6(hono@4.12.21)(zod@4.4.2)
-      hono: 4.12.21
+      '@hono/zod-validator': 0.7.6(hono@4.12.27)(zod@4.4.2)
+      hono: 4.12.27
       openapi3-ts: 4.5.0
       zod: 4.4.2
 
-  '@hono/zod-validator@0.7.6(hono@4.12.21)(zod@4.4.2)':
+  '@hono/zod-validator@0.7.6(hono@4.12.27)(zod@4.4.2)':
     dependencies:
-      hono: 4.12.21
+      hono: 4.12.27
       zod: 4.4.2
 
   '@inquirer/external-editor@1.0.3':
@@ -3063,7 +3063,7 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono@4.12.21: {}
+  hono@4.12.27: {}
 
   html-escaper@2.0.2: {}
 
