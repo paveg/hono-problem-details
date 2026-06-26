@@ -161,7 +161,7 @@
 		"@opentelemetry/api": "^1.0.0",
 		"@standard-schema/spec": "1.1.0",
 		"@vitest/coverage-v8": "^4.1.8",
-		"hono": "^4.12.14",
+		"hono": "^4.12.27",
 		"knip": "6.14.2",
 		"lefthook": "2.1.6",
 		"tsup": "^8.0.0",
