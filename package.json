@@ -120,7 +120,7 @@
 		"@hono/zod-validator": "^0.7.5",
 		"@opentelemetry/api": "^1.0.0",
 		"@standard-schema/spec": "^1.0.0",
-		"hono": ">=4.12.25",
+		"hono": ">=4.12.27",
 		"valibot": "^1.0.0",
 		"zod": "^3.25.0 || ^4.0.0"
 	},
