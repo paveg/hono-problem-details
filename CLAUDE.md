@@ -1,70 +1,59 @@
 # hono-problem-details
 
-RFC 9457 Problem Details middleware for Hono.
+RFC 9457 Problem Details middleware for Hono. Zero runtime dependencies: hono is the
+only required peer; every integration dependency is an optional peer.
 
-## Architecture
+## Layout
 
-```
-src/
-├── types.ts                    # Core types (ProblemDetails, ProblemDetailsInput, options)
-├── status.ts                   # HTTP status code → phrase/slug mapping
-├── error.ts                    # ProblemDetailsError class + normalization
-├── factory.ts                  # problemDetails() factory function
-├── handler.ts                  # problemDetailsHandler() for app.onError
-├── registry.ts                 # createProblemTypeRegistry() for type-safe errors
-├── index.ts                    # Public re-exports
-└── integrations/
-    ├── zod.ts                  # zodProblemHook() for @hono/zod-validator
-    ├── valibot.ts              # valibotProblemHook() for @hono/valibot-validator
-    ├── openapi.ts              # ProblemDetailsSchema for @hono/zod-openapi
-    └── standard-schema.ts      # standardSchemaProblemHook() for @hono/standard-validator
-```
+- src/ — core: error.ts, factory.ts, handler.ts, registry.ts, status.ts, types.ts, utils.ts
+- src/integrations/ — optional integrations, one published subpath export per file
+  (./zod, ./valibot, ./openapi, ./standard-schema); validation.ts and opentelemetry.ts
+  are internal
+- tests/ — vitest suites; tests/type-compat/ is a tsc-only TS-version compat guard
+- docs/adr/ — architecture decision records; read before changing serialization,
+  openapi schema construction, or the localize contract
 
 ## Commands
 
-```bash
-pnpm test              # vitest run
-pnpm test:watch        # vitest (watch mode)
-pnpm lint              # biome check .
-pnpm lint:fix          # biome check --write .
-pnpm typecheck         # tsc --noEmit
-pnpm build             # tsup (ESM + CJS dual output)
-```
+- pnpm test — vitest run (pnpm test:watch for watch mode)
+- pnpm lint / pnpm lint:fix — biome check
+- pnpm typecheck — tsc --noEmit
+- pnpm knip — unused code/dependency detection (runs in CI)
+- pnpm build — tsup, ESM + CJS dual output
+- pnpm test:compat — type-compat check against dist (run pnpm build first)
+- pnpm bench — vitest bench
 
 ## Code Style
 
-- **Formatter**: Biome — tabs, double quotes, semicolons always, 100 char line width
-- **Linter**: Biome recommended rules
-- **Imports**: Use `import type` for type-only imports; `.js` extensions required for local imports
+- Biome: tabs, double quotes, semicolons always, 100 char line width
+- import type for type-only imports; .js extensions required on local imports
 
-## Testing
+## Conventions
 
-- **Runner**: Vitest with v8 coverage provider
-- **Coverage**: 100% threshold on all metrics (statements, branches, functions, lines)
-- **Pattern**: TDD (Red → Green → Refactor). Write tests first.
-- **Naming**: Prefix IDs (H1, F1, Z1, etc.) for cross-referencing with requirements
-- **Integration tests**: Use `app.request()` for end-to-end Hono pipeline testing
-
-## Key Conventions
-
-- **Standard fields always win over extensions** (RFC 9457 §3.1). Enforce in both layers:
-  - Runtime factory (`problemDetails()`): spread as `{ ...extensions, ...standard }` so the standard properties land last
-  - OpenAPI schema (`createProblemDetailsSchema()`): filter standard field keys out of the extension shape before `.extend()` — Zod's `.extend()` would otherwise let conflicting keys replace standard fields
-- **Subpath exports**: Each integration is a separate entry point (`./zod`, `./valibot`, `./openapi`, `./standard-schema`)
-- **External deps**: All peer dependencies must be listed in `tsup.config.ts` `external` array to prevent bundling
-- **No runtime dependencies**: Only `hono` as peer dependency. All integrations are optional peer deps.
+- Standard fields always win over extensions (RFC 9457 §3.1). Runtime enforces it by
+  spread order ({ ...extensions, ...standard }); the openapi schema mirrors it by
+  filtering standard keys from extension shapes. See docs/adr/0002.
+- Problem responses always use the PROBLEM_JSON_CONTENT_TYPE constant
+  (application/problem+json; charset=utf-8), never a hand-written header.
+- New public API: re-export from src/index.ts (knip flags src exports unreachable from
+  an entry) and add it to tests/type-compat/core-consumer.ts.
+- TDD: write the failing test first. Coverage is 100% on all metrics
+  (vitest.config.ts thresholds; only src/index.ts and src/types.ts are excluded).
+- Test names carry prefix IDs (H1, F1, Z1, ...) for cross-referencing requirements;
+  end-to-end tests go through app.request() so the full Hono pipeline runs.
+- Pre-1.0 versioning: breaking changes ship as minor bumps. Every consumer-visible
+  change needs a changeset (pnpm changeset).
 
 ## Workflow
 
-1. Create GitHub Issue
-2. Create feature branch from main
-3. TDD: write failing tests → implement → refactor
-4. Verify: `pnpm lint && pnpm typecheck && pnpm test`
-5. Create PR with `gh pr create`
-6. Auto-merge with `gh pr merge --squash --auto`
+1. GitHub Issue, then feature branch from main (feat/, fix/, chore/, docs/)
+2. TDD: failing tests, implement, refactor
+3. Verify: pnpm lint && pnpm typecheck && pnpm test
+4. PR via gh pr create; merge with gh pr merge --squash --auto
+5. Public artifacts (PR titles/bodies, commits, issues) are written in English
 
 ## Release
 
-- Changesets for versioning (`pnpm changeset`)
-- GitHub Actions auto-creates "Version Packages" PR on main push
-- Merging that PR triggers `pnpm release` (build + publish to npm via OIDC Trusted Publishing)
+Fully automated via changesets: merging to main creates or updates a Version Packages
+PR; merging that PR publishes to npm through OIDC Trusted Publishing. No manual
+publish steps and no npm token.
