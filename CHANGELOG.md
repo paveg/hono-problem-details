@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.8.2
+
+### Patch Changes
+
+- [#162](https://github.com/paveg/hono-problem-details/pull/162) [`976bcf5`](https://github.com/paveg/hono-problem-details/commit/976bcf5dfb07d3cba4cbb1fd9a94759ee69381a9) Thanks [@paveg](https://github.com/paveg)! - Drop source maps from the published package. The build previously set `sourcemap: true` while excluding `.map` files via `files`, which left dangling `//# sourceMappingURL` comments pointing at maps that were never shipped. `sourcemap` is now `false`, so no source-map comments or files are emitted. Aligns with the minimal-footprint peers (hono, zod, valibot). No runtime behavior change.
+
 ## 0.8.1
 
 ### Patch Changes
