@@ -75,8 +75,7 @@
 		}
 	},
 	"files": [
-		"dist",
-		"!dist/**/*.map"
+		"dist"
 	],
 	"sideEffects": false,
 	"scripts": {
