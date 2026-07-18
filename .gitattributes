@@ -1,0 +1,7 @@
+# Force LF line endings in the working tree on all platforms — biome and the
+# .editorconfig both expect LF, and Git's core.autocrlf default on Windows
+# would otherwise convert files to CRLF on checkout and break `pnpm lint`.
+* text=auto eol=lf
+
+# Keep generated lockfiles under their tool's native format
+pnpm-lock.yaml -text
