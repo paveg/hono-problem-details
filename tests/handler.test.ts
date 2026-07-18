@@ -374,7 +374,7 @@ describe("problemDetailsHandler", () => {
 		const res = await app.request("/");
 		expect(res.status).toBe(500);
 		const body = await res.json();
-		expect(body.status).toBe(9999);
+		expect(body.status).toBe(500);
 	});
 
 	it("H25: clamps negative status code to 500", async () => {
@@ -412,7 +412,7 @@ describe("problemDetailsHandler", () => {
 			const res = await app.request("/");
 			expect(res.status).toBe(500);
 			const body = await res.json();
-			expect(body.status).toBe(status);
+			expect(body.status).toBe(500);
 		}
 	});
 

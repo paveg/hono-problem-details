@@ -190,7 +190,7 @@ describe("buildProblemResponse", () => {
 		});
 		expect(res.status).toBe(500);
 		const body = await res.json();
-		expect(body.status).toBe(9999);
+		expect(body.status).toBe(500);
 	});
 
 	it("U20: returns fallback on circular extensions", async () => {

@@ -49,10 +49,11 @@ export function normalizeProblemDetails<T extends Record<string, unknown>>(
 /** Build a RFC 9457 Problem Details Response from a ProblemDetails object */
 export function buildProblemResponse(pd: ProblemDetails): Response {
 	const { extensions, ...standard } = pd;
-	const body = { ...sanitizeExtensions(extensions), ...standard };
+	const status = clampHttpStatus(pd.status);
+	const body = { ...sanitizeExtensions(extensions), ...standard, status };
 	const { json, fallback } = safeStringify(body);
 	return new Response(json, {
-		status: fallback ? 500 : clampHttpStatus(pd.status),
+		status: fallback ? 500 : status,
 		headers: { "Content-Type": PROBLEM_JSON_CONTENT_TYPE },
 	});
 }
