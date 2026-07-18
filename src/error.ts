@@ -11,6 +11,12 @@ export class ProblemDetailsError extends Error {
 	readonly problemDetails: ProblemDetails;
 
 	/**
+	 * Whether the input carried an explicit `type`. Lets the handler apply
+	 * `typePrefix`/`defaultType` only when the thrower left `type` unset.
+	 */
+	readonly hasExplicitType: boolean;
+
+	/**
 	 * @param input - Missing `type` defaults to `"about:blank"`;
 	 * missing `title` is derived from the HTTP status code.
 	 */
@@ -19,6 +25,7 @@ export class ProblemDetailsError extends Error {
 		super(pd.detail ?? pd.title);
 		this.name = "ProblemDetailsError";
 		this.problemDetails = pd;
+		this.hasExplicitType = input.type !== undefined;
 	}
 
 	/** Build a standalone `application/problem+json` Response without the handler middleware. */

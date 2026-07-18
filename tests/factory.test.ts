@@ -125,11 +125,11 @@ describe("problemDetails factory", () => {
 		expect(response.status).toBe(500);
 	});
 
-	it("F14: getResponse() preserves original status in body even when HTTP status is clamped", async () => {
+	it("F14: getResponse() clamps body status to match the clamped HTTP status", async () => {
 		const error = problemDetails({ status: 9999 });
 		const response = error.getResponse();
 		const body = await response.json();
-		expect(body.status).toBe(9999);
+		expect(body.status).toBe(500);
 		expect(response.status).toBe(500);
 	});
 
