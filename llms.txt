@@ -182,7 +182,9 @@ Content-Type: `application/problem+json; charset=utf-8`
 - **Extension keys cannot override standard fields.** If you pass
   `extensions: { status: 999 }`, it is silently dropped — standard `status` always wins.
 - **Prototype pollution keys are stripped.** `__proto__`, `constructor`, and `prototype`
-  are removed from extension members before serialization.
+  are removed from extension members (the `extensions` input of `problemDetails()`,
+  `mapError`, and `localize`) before serialization. Validation-hook responses have a
+  fixed `{field, message, code}` shape and never merge caller-supplied keys.
 - **`Accept-Language` responses need `Vary`.** If you use the `localize` option, add
   `Vary: Accept-Language` from your own middleware. This library does not set it.
 - **`localize` throws are swallowed.** If your `localize` callback throws, the handler

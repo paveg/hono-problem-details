@@ -55,7 +55,7 @@ Three repair strategies were considered:
    `getProblemDetailsSchema()` instead. Consumers call it explicitly. Breaking
    change to the public API.
 
-A throwaway spike (`tests/integrations/openapi.spike.test.ts`) verified all three
+An uncommitted throwaway spike (not preserved in the repository) verified all three
 under `zod@4.3.6` + `@hono/zod-openapi@1.3.0` +
 `@asteasolutions/zod-to-openapi@8.5.0`:
 
@@ -63,7 +63,7 @@ under `zod@4.3.6` + `@hono/zod-openapi@1.3.0` +
   But when the Proxy is registered as a route response schema in `OpenAPIHono`,
   the generated OpenAPI document loses `title: "ProblemDetails"`. Root cause:
   `zod-to-openapi` v8 stores metadata in a global `Map<ZodSchema, metadata>`
-  keyed by schema identity (`@asteasolutions/zod-to-openapi/dist/index.mjs:285`).
+  keyed by schema identity (a Map-backed registry inside `@asteasolutions/zod-to-openapi`).
   The Proxy and its wrapped schema have different identities, so registry
   lookup fails.
 - **Hybrid** repairs the bug only for consumers who route through
@@ -166,10 +166,10 @@ app.openapi(createRoute({
 
 The following tests must land alongside the implementation to prevent recurrence:
 
-1. **Lazy-eval test** — import the module while a mock of `@hono/zod-openapi`
-   is in place whose `.openapi` prototype method throws on call. The `import`
-   must succeed; the first `getProblemDetailsSchema()` call must trigger the
-   throw. Proves construction is deferred.
+1. **Lazy-eval test** — spy on `z.ZodType.prototype.openapi`, import the
+   module, and assert the spy was NOT called; then call
+   `getProblemDetailsSchema()` and assert the spy WAS called. Proves
+   construction is deferred past module load.
 2. **OpenAPI integration test** — assert that `getProblemDetailsSchema()`
    result, when registered with `OpenAPIHono`, emits `title: "ProblemDetails"`
    in the generated OpenAPI 3.1 document.
