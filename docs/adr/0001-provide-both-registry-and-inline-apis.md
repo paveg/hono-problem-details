@@ -30,9 +30,10 @@ This middleware ships **both** APIs, deliberately unranked:
   `.create(key, options)` method
 
 The README guidance points users to the registry when the same error is thrown from more
-than one handler, and to the inline factory otherwise. `createProblemTypeRegistry` builds
-on top of `problemDetails` internally (see `src/registry.ts`), so the registry is a strict
-superset of the inline API — no code duplication.
+than one handler, and to the inline factory otherwise. Both APIs are thin siblings over the
+same core: `createProblemTypeRegistry` constructs `ProblemDetailsError` directly (see
+`src/registry.ts`), just as `problemDetails` does, so they share one pipeline without
+either building on the other.
 
 Neither API requires the other. A project can adopt `problemDetails()` alone and never
 touch the registry, or vice versa.

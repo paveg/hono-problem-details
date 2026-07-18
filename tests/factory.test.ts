@@ -94,7 +94,9 @@ describe("problemDetails factory", () => {
 	it("F10: dangerous extension keys are stripped from response", async () => {
 		const error = problemDetails({
 			status: 400,
-			extensions: { __proto__: { polluted: true }, constructor: "bad", safe: "ok" },
+			extensions: JSON.parse(
+				'{"__proto__": {"polluted": true}, "constructor": "bad", "safe": "ok"}',
+			),
 		});
 		const response = error.getResponse();
 		const body = await response.json();
@@ -178,7 +180,7 @@ describe("problemDetails factory", () => {
 	it("F19: extensions with only dangerous keys produce clean body", async () => {
 		const error = problemDetails({
 			status: 400,
-			extensions: { __proto__: "x", constructor: "y", prototype: "z" },
+			extensions: JSON.parse('{"__proto__": "x", "constructor": "y", "prototype": "z"}'),
 		});
 		const response = error.getResponse();
 		const body = await response.json();

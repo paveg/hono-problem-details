@@ -18,8 +18,10 @@ Three options exist for handling a thrown `localize` callback:
    server error
 3. **Fall back to the un-localized ProblemDetails** — ignore the callback failure and continue
 
-Option 1 is dangerous: Hono's `app.onError` re-entry semantics mean a throwing error
-handler can produce an infinite loop or an unhelpful "error in error handler" response.
+Option 1 is dangerous: when `app.onError` itself throws an `Error`, Hono re-invokes the
+error handler exactly once more (a single bounded re-entry — not an infinite loop),
+duplicating side effects and typically ending in an unhelpful "error in error handler"
+response.
 This is a well-known footgun for Node.js and Hono error middleware.
 
 Option 2 loses the original error context. A 404 with a broken Japanese translation

@@ -53,7 +53,7 @@ npm install hono-problem-details
 
 ### Requirements
 
-- Hono `>= 4.12.14` (peer dependency)
+- Hono `>= 4.12.27` (peer dependency; floor raised for upstream security fixes)
 - TypeScript `>= 5.0` — the published `.d.ts` files are CI-tested against TS 5.0, 5.4, 5.7, 5.9, and 6.0. Older TS versions may work but are not verified.
 - Node.js `>= 22` (Node 20 reached end-of-life in April 2026; v0.6.0 raised the floor)
 
@@ -74,7 +74,7 @@ app.get("/not-found", (c) => {
 
 // Response:
 // HTTP/1.1 404 Not Found
-// Content-Type: application/problem+json
+// Content-Type: application/problem+json; charset=utf-8
 // {
 //   "type": "about:blank",
 //   "status": 404,
@@ -180,7 +180,7 @@ app.get("/boom", () => {
 });
 
 // HTTP/1.1 500 Internal Server Error
-// Content-Type: application/problem+json
+// Content-Type: application/problem+json; charset=utf-8
 // {
 //   "type": "about:blank",
 //   "status": 500,
@@ -297,7 +297,7 @@ app.post("/users", zValidator("json", schema, zodProblemHook()), (c) => {
 
 // Validation error response:
 // HTTP/1.1 422 Unprocessable Content
-// Content-Type: application/problem+json
+// Content-Type: application/problem+json; charset=utf-8
 // {
 //   "type": "about:blank",
 //   "status": 422,
@@ -447,7 +447,7 @@ problemDetailsHandler({
 });
 ```
 
-When enabled, the handler adds a `traceId` extension member to all problem details responses when a trace is active. 
+When enabled, the handler adds a `traceId` extension member to every response it produces (thrown `ProblemDetailsError`s, `HTTPException`s, and unhandled errors) when a trace is active. Validation-hook responses (`zodProblemHook`, `valibotProblemHook`, `standardSchemaProblemHook`) are returned directly by the validator and never pass through the handler, so they do not carry `traceId`. 
 This allows clients to correlate errors with server-side traces for easier debugging.
 
 ## Handler Options
