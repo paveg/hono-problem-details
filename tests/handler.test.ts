@@ -3,6 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import { describe, expect, it, vi } from "vitest";
 import { problemDetails } from "../src/factory.js";
 import { problemDetailsHandler } from "../src/handler.js";
+import { createProblemTypeRegistry } from "../src/registry.js";
 import type { OtelApiLike } from "../src/types.js";
 
 function createApp(options?: Parameters<typeof problemDetailsHandler>[0]) {
@@ -755,5 +756,62 @@ describe("problemDetailsHandler", () => {
 		const body = await res.json();
 		expect(body.requestId).toBe("req-1");
 		expect(body.traceId).toBe("test-trace-id");
+	});
+
+	it("H50: defaultType applies to problemDetails() thrown without a type", async () => {
+		const app = createApp({ defaultType: "https://api.example.com/errors/unknown" });
+		app.get("/", () => {
+			throw problemDetails({ status: 404 });
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("https://api.example.com/errors/unknown");
+	});
+
+	it("H51: typePrefix applies to problemDetails() thrown without a type", async () => {
+		const app = createApp({ typePrefix: "https://api.example.com/problems" });
+		app.get("/", () => {
+			throw problemDetails({ status: 404 });
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("https://api.example.com/problems/not-found");
+	});
+
+	it("H52: explicit about:blank is not overridden by defaultType", async () => {
+		const app = createApp({ defaultType: "https://api.example.com/errors/unknown" });
+		app.get("/", () => {
+			throw problemDetails({ status: 404, type: "about:blank" });
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+	});
+
+	it("H53: defaultType applies to mapError results without a type", async () => {
+		const app = createApp({
+			defaultType: "https://api.example.com/errors/unknown",
+			mapError: () => ({ status: 422, title: "Mapped" }),
+		});
+		app.get("/", () => {
+			throw new RangeError("boom");
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.status).toBe(422);
+		expect(body.type).toBe("https://api.example.com/errors/unknown");
+	});
+
+	it("H54: typePrefix applies to registry-created errors without a type", async () => {
+		const problems = createProblemTypeRegistry({
+			outOfStock: { status: 409, title: "Out of Stock" },
+		});
+		const app = createApp({ typePrefix: "https://api.example.com/problems" });
+		app.get("/", () => {
+			throw problems.create("outOfStock");
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.type).toBe("https://api.example.com/problems/conflict");
 	});
 });
