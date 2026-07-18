@@ -19,7 +19,10 @@ function toResponse(
 	c: Context,
 	options: ProblemDetailsHandlerOptions,
 ): Response {
-	let pd = normalizeProblemDetails(input);
+	let pd = normalizeProblemDetails({
+		...input,
+		type: input.type ?? buildType(input.status, options),
+	});
 
 	if (options.autoInstance && pd.instance === undefined) {
 		pd = { ...pd, instance: c.req.path };
@@ -66,7 +69,8 @@ function toResponse(
 export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}): ErrorHandler {
 	return (error, c) => {
 		if (error instanceof ProblemDetailsError) {
-			return toResponse(error.problemDetails, c, options);
+			const pd = error.problemDetails;
+			return toResponse(error.hasExplicitType ? pd : { ...pd, type: undefined }, c, options);
 		}
 
 		if (options.mapError) {
@@ -80,7 +84,6 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 			return toResponse(
 				{
 					status: error.status,
-					type: buildType(error.status, options),
 					title: statusToPhrase(error.status),
 					detail: error.message,
 				},
@@ -92,7 +95,6 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 		return toResponse(
 			{
 				status: 500,
-				type: buildType(500, options),
 				title: "Internal Server Error",
 				detail: "An unexpected error occurred",
 				extensions: options.includeStack ? { stack: error.stack } : undefined,
