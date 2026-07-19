@@ -1,5 +1,15 @@
 # hono-problem-details
 
+## 0.9.0
+
+### Minor Changes
+
+- [#170](https://github.com/paveg/hono-problem-details/pull/170) [`6df8dba`](https://github.com/paveg/hono-problem-details/commit/6df8dba9629605d1e0f89735319ee3d1046fb293) Thanks [@paveg](https://github.com/paveg)! - `typePrefix` and `defaultType` now apply to errors thrown via `problemDetails()` / registry `create()` and to `mapError` results when no explicit `type` was set. Previously these handler options only affected `HTTPException` and unhandled errors, silently leaving `about:blank` on the library's primary API. An explicitly set `type` (including an explicit `"about:blank"`) is never overridden.
+
+### Patch Changes
+
+- [#169](https://github.com/paveg/hono-problem-details/pull/169) [`0d5d8e4`](https://github.com/paveg/hono-problem-details/commit/0d5d8e4dcd1fe098820bac954746cf5d87723803) Thanks [@paveg](https://github.com/paveg)! - The JSON body's `status` field is now clamped to the same 200-599 range as the HTTP response status. Previously `problemDetails({ status: 9999 })` produced an HTTP 500 response whose body still said `"status": 9999`, contradicting RFC 9457's expectation that the body `status` mirrors the response status.
+
 ## 0.8.2
 
 ### Patch Changes
