@@ -91,4 +91,78 @@ describe("createProblemTypeRegistry", () => {
 		expect(error.problemDetails.instance).toBeUndefined();
 		expect(error.problemDetails.extensions).toBeUndefined();
 	});
+
+	it("R11: without autoCode, no code extension is added", () => {
+		const error = registry.create("ORDER_CONFLICT");
+		expect(error.problemDetails.extensions).toBeUndefined();
+	});
+});
+
+describe("createProblemTypeRegistry with autoCode", () => {
+	const registry = createProblemTypeRegistry(
+		{
+			ORDER_CONFLICT: {
+				type: "https://api.example.com/problems/order-conflict",
+				status: 409,
+				title: "Order Conflict",
+			},
+			RATE_LIMITED: {
+				type: "https://api.example.com/problems/rate-limited",
+				status: 429,
+				title: "Too Many Requests",
+			},
+			V2_AUTH: {
+				type: "https://api.example.com/problems/v2-auth",
+				status: 401,
+				title: "V2 Auth Required",
+			},
+			AUTH__TOKEN_EXPIRED: {
+				type: "https://api.example.com/problems/auth-token-expired",
+				status: 401,
+				title: "Token Expired",
+			},
+			LEGACY_ERROR: {
+				type: "https://api.example.com/problems/legacy-error",
+				status: 400,
+				title: "Legacy Error",
+				code: "legacy/error_code",
+			},
+		},
+		{ autoCode: true },
+	);
+
+	it("R12: autoCode derives kebab-case code from SCREAMING_SNAKE key", () => {
+		const error = registry.create("ORDER_CONFLICT");
+		expect(error.problemDetails.extensions).toEqual({ code: "order-conflict" });
+	});
+
+	it("R13: autoCode-derived code merges alongside other extensions", () => {
+		const error = registry.create("RATE_LIMITED", { extensions: { retryAfter: 60 } });
+		expect(error.problemDetails.extensions).toEqual({ code: "rate-limited", retryAfter: 60 });
+	});
+
+	it("R14: autoCode keeps digits attached to the preceding segment", () => {
+		const error = registry.create("V2_AUTH");
+		expect(error.problemDetails.extensions).toEqual({ code: "v2-auth" });
+	});
+
+	it("R15: autoCode collapses consecutive underscores to a single hyphen", () => {
+		const error = registry.create("AUTH__TOKEN_EXPIRED");
+		expect(error.problemDetails.extensions).toEqual({ code: "auth-token-expired" });
+	});
+
+	it("R16: explicit code on the registry definition overrides auto-derivation", () => {
+		const error = registry.create("LEGACY_ERROR");
+		expect(error.problemDetails.extensions).toEqual({ code: "legacy/error_code" });
+	});
+
+	it("R17: user-supplied extensions.code on create() overrides the derived value", () => {
+		const error = registry.create("ORDER_CONFLICT", { extensions: { code: "custom-code" } });
+		expect(error.problemDetails.extensions).toEqual({ code: "custom-code" });
+	});
+
+	it("R18: user-supplied extensions.code overrides an explicit registry code", () => {
+		const error = registry.create("LEGACY_ERROR", { extensions: { code: "override" } });
+		expect(error.problemDetails.extensions).toEqual({ code: "override" });
+	});
 });
