@@ -127,6 +127,16 @@ describe("createProblemTypeRegistry with autoCode", () => {
 				title: "Legacy Error",
 				code: "legacy/error_code",
 			},
+			_AUTH_: {
+				type: "https://api.example.com/problems/auth",
+				status: 401,
+				title: "Auth Required",
+			},
+			ÄUTH_KEY: {
+				type: "https://api.example.com/problems/auth-key",
+				status: 401,
+				title: "Non-ASCII Key",
+			},
 		},
 		{ autoCode: true },
 	);
@@ -149,6 +159,16 @@ describe("createProblemTypeRegistry with autoCode", () => {
 	it("R15: autoCode collapses consecutive underscores to a single hyphen", () => {
 		const error = registry.create("AUTH__TOKEN_EXPIRED");
 		expect(error.problemDetails.extensions).toEqual({ code: "auth-token-expired" });
+	});
+
+	it("R15b: autoCode strips leading and trailing underscores", () => {
+		const error = registry.create("_AUTH_");
+		expect(error.problemDetails.extensions).toEqual({ code: "auth" });
+	});
+
+	it("R15c: autoCode leaves non-ASCII characters unchanged", () => {
+		const error = registry.create("ÄUTH_KEY");
+		expect(error.problemDetails.extensions).toEqual({ code: "Äuth-key" });
 	});
 
 	it("R16: explicit code on the registry definition overrides auto-derivation", () => {

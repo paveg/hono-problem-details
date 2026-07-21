@@ -41,7 +41,7 @@ interface ProblemTypeRegistry<K extends string> {
  */
 function deriveCode(key: string): string {
 	return key
-		.toLowerCase()
+		.replace(/[A-Z]/g, (character) => character.toLowerCase())
 		.replace(/_+/g, "-")
 		.replace(/^-+|-+$/g, "");
 }

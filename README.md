@@ -289,10 +289,10 @@ const error = problems.create("ORDER_CONFLICT");
 error.problemDetails.extensions; // { code: "order-conflict" }
 ```
 
-The default transformation lowercases the key, collapses runs of underscores into a single
-hyphen, and strips leading/trailing hyphens (`V2_AUTH` → `v2-auth`, `AUTH__TOKEN_EXPIRED` →
-`auth-token-expired`). It's ASCII-only — non-ASCII keys pass through unchanged aside from
-lowercasing.
+The default transformation lowercases ASCII letters, collapses runs of underscores into a
+single hyphen, and strips leading/trailing hyphens (`V2_AUTH` → `v2-auth`, `AUTH__TOKEN_EXPIRED`
+→ `auth-token-expired`, `_AUTH_` → `auth`). It's ASCII-only — non-ASCII characters pass through
+completely unchanged, including case.
 
 Two overrides take priority over the derived value, in this order:
 
