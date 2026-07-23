@@ -61,6 +61,19 @@ const _registryError: ProblemDetailsError = _registry.create("ORDER_CONFLICT", {
 	detail: "Already exists",
 });
 
+const _autoCodeRegistry = createProblemTypeRegistry(
+	{
+		ORDER_CONFLICT: {
+			type: "https://example.com/problems/order-conflict",
+			status: 409,
+			title: "Order Conflict",
+			code: "order-conflict",
+		},
+	},
+	{ autoCode: true },
+);
+const _autoCodeError: ProblemDetailsError = _autoCodeRegistry.create("ORDER_CONFLICT");
+
 const _phrase: string | undefined = statusToPhrase(404);
 const _slug: string | undefined = statusToSlug(404);
 
