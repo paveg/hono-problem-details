@@ -298,7 +298,14 @@ Two overrides take priority over the derived value, in this order:
 1. An explicit `code` on the registry definition (emitted even without `autoCode`):
    ```ts
    createProblemTypeRegistry(
-     { ORDER_CONFLICT: { type, status, title, code: "legacy/order_conflict" } },
+     {
+       ORDER_CONFLICT: {
+         type: "https://api.example.com/problems/order-conflict",
+         status: 409,
+         title: "Order Conflict",
+         code: "legacy/order_conflict",
+       },
+     },
      { autoCode: true },
    );
    ```
