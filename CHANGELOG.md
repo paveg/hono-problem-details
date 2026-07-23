@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.10.0
+
+### Minor Changes
+
+- [#173](https://github.com/paveg/hono-problem-details/pull/173) [`6e27624`](https://github.com/paveg/hono-problem-details/commit/6e27624b9ba758c483daeb42b151e27368209cf5) Thanks [@paveg](https://github.com/paveg)! - Add opt-in `autoCode` option to `createProblemTypeRegistry` that derives a `code` extension from each registry key (SCREAMING_SNAKE -> kebab-case). An explicit `code` on the registry definition, or `extensions.code` passed to `.create()`, overrides the derived value. `get(key)` returns the same resolved `code` that `create(key)` emits.
+
 ## 0.9.0
 
 ### Minor Changes
