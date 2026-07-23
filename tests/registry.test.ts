@@ -96,6 +96,26 @@ describe("createProblemTypeRegistry", () => {
 		const error = registry.create("ORDER_CONFLICT");
 		expect(error.problemDetails.extensions).toBeUndefined();
 	});
+
+	it("R19: create() with an unregistered key does not throw and clamps to 500", () => {
+		const error = registry.create("MISSING" as "ORDER_CONFLICT");
+		expect(error.problemDetails.status).toBeUndefined();
+		expect(error.getResponse().status).toBe(500);
+	});
+
+	it("R20: an explicit definition code emits even without autoCode", () => {
+		const codeRegistry = createProblemTypeRegistry({
+			LEGACY: {
+				type: "https://api.example.com/problems/legacy",
+				status: 400,
+				title: "Legacy",
+				code: "legacy-code",
+			},
+		});
+		expect(codeRegistry.create("LEGACY").problemDetails.extensions).toEqual({
+			code: "legacy-code",
+		});
+	});
 });
 
 describe("createProblemTypeRegistry with autoCode", () => {
@@ -132,11 +152,6 @@ describe("createProblemTypeRegistry with autoCode", () => {
 				status: 401,
 				title: "Auth Required",
 			},
-			ÄUTH_KEY: {
-				type: "https://api.example.com/problems/auth-key",
-				status: 401,
-				title: "Non-ASCII Key",
-			},
 		},
 		{ autoCode: true },
 	);
@@ -166,11 +181,6 @@ describe("createProblemTypeRegistry with autoCode", () => {
 		expect(error.problemDetails.extensions).toEqual({ code: "auth" });
 	});
 
-	it("R15c: autoCode leaves non-ASCII characters unchanged", () => {
-		const error = registry.create("ÄUTH_KEY");
-		expect(error.problemDetails.extensions).toEqual({ code: "Äuth-key" });
-	});
-
 	it("R16: explicit code on the registry definition overrides auto-derivation", () => {
 		const error = registry.create("LEGACY_ERROR");
 		expect(error.problemDetails.extensions).toEqual({ code: "legacy/error_code" });
@@ -184,5 +194,10 @@ describe("createProblemTypeRegistry with autoCode", () => {
 	it("R18: user-supplied extensions.code overrides an explicit registry code", () => {
 		const error = registry.create("LEGACY_ERROR", { extensions: { code: "override" } });
 		expect(error.problemDetails.extensions).toEqual({ code: "override" });
+	});
+
+	it("R21: get() returns the derived code, matching create()", () => {
+		expect(registry.get("ORDER_CONFLICT").code).toBe("order-conflict");
+		expect(registry.get("LEGACY_ERROR").code).toBe("legacy/error_code");
 	});
 });

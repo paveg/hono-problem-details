@@ -289,14 +289,13 @@ const error = problems.create("ORDER_CONFLICT");
 error.problemDetails.extensions; // { code: "order-conflict" }
 ```
 
-The default transformation lowercases ASCII letters, collapses runs of underscores into a
-single hyphen, and strips leading/trailing hyphens (`V2_AUTH` → `v2-auth`, `AUTH__TOKEN_EXPIRED`
-→ `auth-token-expired`, `_AUTH_` → `auth`). It's ASCII-only — non-ASCII characters pass through
-completely unchanged, including case.
+The default transformation lowercases, collapses runs of underscores into a single hyphen, and
+strips leading/trailing hyphens (`V2_AUTH` → `v2-auth`, `AUTH__TOKEN_EXPIRED` → `auth-token-expired`,
+`_AUTH_` → `auth`). Keys are expected to be `SCREAMING_SNAKE_CASE`.
 
 Two overrides take priority over the derived value, in this order:
 
-1. An explicit `code` on the registry definition:
+1. An explicit `code` on the registry definition (emitted even without `autoCode`):
    ```ts
    createProblemTypeRegistry(
      { ORDER_CONFLICT: { type, status, title, code: "legacy/order_conflict" } },
@@ -305,6 +304,9 @@ Two overrides take priority over the derived value, in this order:
    ```
 2. `extensions.code` passed to `.create()`, which wins over both the derived value and an
    explicit registry `code`.
+
+`get(key)` returns the same resolved `code` that `create(key)` emits, so docs or schemas built
+from the registry stay in sync with the responses.
 
 ### When to use the registry vs `problemDetails()`
 

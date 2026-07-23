@@ -4,7 +4,10 @@ interface ProblemTypeDefinition {
 	type: string;
 	status: number;
 	title: string;
-	/** Explicit `code` extension for this type. Overrides `autoCode` derivation. */
+	/**
+	 * Explicit `code` extension for this type. Always emitted, regardless of
+	 * `autoCode`, and takes priority over an `autoCode`-derived value.
+	 */
 	code?: string;
 }
 
@@ -28,7 +31,10 @@ interface ProblemTypeRegistry<K extends string> {
 		key: K,
 		options?: CreateOptions<T>,
 	) => ProblemDetailsError;
-	/** Get the base definition (type, status, title) for a registered key. */
+	/**
+	 * Get the resolved definition for a registered key, including any
+	 * `autoCode`-derived or explicit `code` that `create()` would emit.
+	 */
 	get: (key: K) => ProblemTypeDefinition;
 	/** List all registered problem type keys. */
 	types: () => K[];
@@ -37,11 +43,11 @@ interface ProblemTypeRegistry<K extends string> {
 /**
  * Derive a `code` extension from a SCREAMING_SNAKE_CASE registry key.
  * Lowercases, collapses runs of underscores into a single hyphen, and strips
- * leading/trailing hyphens. Non-ASCII characters pass through unchanged.
+ * leading/trailing hyphens.
  */
 function deriveCode(key: string): string {
 	return key
-		.replace(/[A-Z]/g, (character) => character.toLowerCase())
+		.toLowerCase()
 		.replace(/_+/g, "-")
 		.replace(/^-+|-+$/g, "");
 }
@@ -70,17 +76,21 @@ export function createProblemTypeRegistry<K extends string>(
 	options?: RegistryOptions,
 ): ProblemTypeRegistry<K> {
 	const autoCode = options?.autoCode ?? false;
+	const resolved = new Map<K, ProblemTypeDefinition>(
+		(Object.keys(definitions) as K[]).map((key) => {
+			const definition = definitions[key];
+			const code = definition.code ?? (autoCode ? deriveCode(key) : undefined);
+			return [key, code === undefined ? definition : { ...definition, code }];
+		}),
+	);
 	return {
 		create: (key, createOptions) => {
-			const { code, ...definition } = definitions[key];
-			const resolvedCode = code ?? (autoCode ? deriveCode(key) : undefined);
+			const { code, ...definition } = resolved.get(key) ?? ({} as ProblemTypeDefinition);
 			const extensions =
-				resolvedCode !== undefined
-					? { code: resolvedCode, ...createOptions?.extensions }
-					: createOptions?.extensions;
+				code !== undefined ? { code, ...createOptions?.extensions } : createOptions?.extensions;
 			return new ProblemDetailsError({ ...definition, ...createOptions, extensions });
 		},
-		get: (key) => definitions[key],
-		types: () => Object.keys(definitions) as K[],
+		get: (key) => resolved.get(key) as ProblemTypeDefinition,
+		types: () => [...resolved.keys()],
 	};
 }
