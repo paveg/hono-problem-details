@@ -161,7 +161,7 @@
 		"@standard-schema/spec": "1.1.0",
 		"@vitest/coverage-v8": "^4.1.8",
 		"hono": "^4.12.27",
-		"knip": "6.27.0",
+		"knip": "6.29.0",
 		"lefthook": "2.1.10",
 		"tsup": "^8.0.0",
 		"typescript": "^6.0.3",
