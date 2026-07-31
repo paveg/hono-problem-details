@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.10.1
+
+### Patch Changes
+
+- [#178](https://github.com/paveg/hono-problem-details/pull/178) [`cb6f938`](https://github.com/paveg/hono-problem-details/commit/cb6f938ff6c25d8299d581c6cd69942e53ca2d55) Thanks [@paveg](https://github.com/paveg)! - Verify published type definitions against TypeScript 7.0 (native compiler). The type-compat CI matrix now covers TS 5.0, 5.4, 5.7, 5.9, 6.0, and 7.0, widening the documented consumer support guarantee. No runtime changes.
+
 ## 0.10.0
 
 ### Minor Changes
