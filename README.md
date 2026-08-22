@@ -490,8 +490,11 @@ const schema = problemDetailsJsonSchema({
 Extension members merge at the top level, and standard RFC 9457 fields win on key
 collision — the same rule the Zod helpers and the runtime follow
 ([ADR-0002](./docs/adr/0002-extension-flatten-with-standard-field-precedence.md)).
-Each call returns a fresh object, so you can safely tweak the result (e.g. push extra
-keys into `required`) without affecting other call sites.
+Keys the runtime strips as prototype-pollution guards (`__proto__`, `constructor`,
+`prototype`) are excluded too, so the schema never documents a member that real
+responses omit. Each call returns a fresh object with extension schemas cloned, so
+you can safely tweak the result (e.g. push extra keys into `required`) without
+affecting other call sites or your own input.
 
 ## Localization
 

@@ -77,6 +77,30 @@ describe("problemDetailsJsonSchema", () => {
 		expect(second.properties.status).toMatchObject({ type: "integer" });
 		expect(second.required).toEqual(["type", "status", "title"]);
 	});
+
+	it("JS12: does not alias caller-supplied extension schemas", () => {
+		const shared = { type: "array", items: { type: "string" } };
+		const first = problemDetailsJsonSchema({ extensions: { errors: shared } });
+		(first.properties.errors as { items: { type: string } }).items.type = "integer";
+		const second = problemDetailsJsonSchema({ extensions: { errors: shared } });
+		expect(shared.items.type).toBe("string");
+		expect(second.properties.errors).toEqual({ type: "array", items: { type: "string" } });
+	});
+
+	it("JS13: drops extension keys the runtime strips as prototype-pollution guards", () => {
+		const schema = problemDetailsJsonSchema({
+			extensions: {
+				constructor: { type: "string" },
+				prototype: { type: "string" },
+				["__proto__"]: { type: "string" },
+				safe: { type: "string" },
+			},
+		});
+		expect(Object.hasOwn(schema.properties, "constructor")).toBe(false);
+		expect(Object.hasOwn(schema.properties, "prototype")).toBe(false);
+		expect(Object.hasOwn(schema.properties, "__proto__")).toBe(false);
+		expect(schema.properties.safe).toEqual({ type: "string" });
+	});
 });
 
 describe("problemDetailsResponseJsonSchema", () => {

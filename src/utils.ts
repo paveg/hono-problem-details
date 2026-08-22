@@ -4,7 +4,7 @@ import type { ProblemDetails, ProblemDetailsInput } from "./types.js";
 /** RFC 9457 media type: `application/problem+json; charset=utf-8`. */
 export const PROBLEM_JSON_CONTENT_TYPE = "application/problem+json; charset=utf-8";
 
-const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+export const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
 /** Strip keys that could cause prototype pollution in downstream consumers */
 export function sanitizeExtensions(

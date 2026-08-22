@@ -1,4 +1,5 @@
 import { statusToPhrase } from "../status.js";
+import { DANGEROUS_KEYS } from "../utils.js";
 
 export type JsonSchemaObject = Record<string, unknown>;
 
@@ -19,10 +20,12 @@ const STANDARD_FIELD_KEYS = new Set(["type", "status", "title", "detail", "insta
  * Extensions are merged at top level per RFC 9457 §3.1, and **standard fields
  * always win** over extension keys that collide (mirroring the runtime spread
  * order in `problemDetails()`). Conflicting extension keys are silently
- * dropped from the schema. See ADR-0002.
+ * dropped from the schema (see ADR-0002), as are the prototype-pollution
+ * guard keys `sanitizeExtensions` strips from every real response.
  *
- * A fresh object is returned on every call so callers can safely mutate the
- * result (e.g. append to `required`) without affecting other call sites.
+ * A fresh object is returned on every call, with extension schemas cloned,
+ * so callers can safely mutate the result (e.g. append to `required`)
+ * without affecting other call sites or their own input.
  */
 export function problemDetailsJsonSchema(options?: {
 	extensions?: Record<string, JsonSchemaObject>;
@@ -39,8 +42,8 @@ export function problemDetailsJsonSchema(options?: {
 		instance: { type: "string", description: "URI identifying the occurrence" },
 	};
 	for (const [key, schema] of Object.entries(options?.extensions ?? {})) {
-		if (!STANDARD_FIELD_KEYS.has(key)) {
-			properties[key] = schema;
+		if (!STANDARD_FIELD_KEYS.has(key) && !DANGEROUS_KEYS.has(key)) {
+			properties[key] = structuredClone(schema);
 		}
 	}
 	return {
