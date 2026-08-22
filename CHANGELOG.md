@@ -1,5 +1,13 @@
 # hono-problem-details
 
+## 0.11.0
+
+### Minor Changes
+
+- [#189](https://github.com/paveg/hono-problem-details/pull/189) [`471e84d`](https://github.com/paveg/hono-problem-details/commit/471e84d82a1ecfef1cc7fa564bf04d2defa12b2b) Thanks [@paveg](https://github.com/paveg)! - Add `hono-problem-details/openapi-json-schema`: schema-library-agnostic OpenAPI helpers for non-Zod stacks ([#185](https://github.com/paveg/hono-problem-details/issues/185)).
+
+  `problemDetailsJsonSchema()` emits the RFC 9457 Problem Details schema as plain JSON Schema (draft 2020-12, the OpenAPI 3.1 base dialect) with zero dependencies, and `problemDetailsResponseJsonSchema()` wraps it as a ready-to-use OpenAPI response object for `hono-openapi`'s `describeRoute()` and similar documentation layers. Extension members merge at the top level with standard fields winning on collision, mirroring the existing Zod helpers and the runtime (ADR-0002).
+
 ## 0.10.1
 
 ### Patch Changes
