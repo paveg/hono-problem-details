@@ -39,6 +39,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm vitest run --coverage
       - run: pnpm build
+      - name: Check published type resolution (attw)
+        run: pnpm test:attw
 
   type-compat:
     runs-on: ubuntu-latest
