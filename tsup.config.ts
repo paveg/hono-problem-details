@@ -6,6 +6,7 @@ export default defineConfig({
 		"integrations/zod": "src/integrations/zod.ts",
 		"integrations/valibot": "src/integrations/valibot.ts",
 		"integrations/openapi": "src/integrations/openapi.ts",
+		"integrations/openapi-json-schema": "src/integrations/openapi-json-schema.ts",
 		"integrations/standard-schema": "src/integrations/standard-schema.ts",
 	},
 	format: ["esm", "cjs"],

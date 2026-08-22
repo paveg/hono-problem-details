@@ -37,7 +37,7 @@ can all agree on.
 - **Hono native** — `app.onError` handler with RFC-compliant defaults
 - **Zod integration** — `@hono/zod-validator` hook for validation errors
 - **Valibot integration** — `@hono/valibot-validator` hook for validation errors
-- **OpenAPI integration** — `@hono/zod-openapi` schemas for API documentation
+- **OpenAPI integration** — `@hono/zod-openapi` schemas for API documentation, plus dependency-free plain JSON Schema helpers for non-Zod stacks
 - **OpenTelemetry integration** — `@opentelemetry/api` for automatically injecting trace information. 
 - **Standard Schema** — `@hono/standard-validator` hook (works with any schema library)
 - **Type-safe** — full TypeScript support with inference
@@ -451,6 +451,47 @@ const errorWithExtensions = createProblemDetailsSchema(
 > the const. The factory is memoized — repeat calls return the same instance.
 > See [ADR-0004](./docs/adr/0004-defer-openapi-schema-construction-via-factory.md)
 > for the bundler-related reason this changed.
+
+### Without Zod: plain JSON Schema
+
+Not on Zod? `hono-problem-details/openapi-json-schema` emits the same Problem Details
+schema as **plain JSON Schema** (draft 2020-12, the OpenAPI 3.1 base dialect) with zero
+dependencies. It works with any documentation layer that accepts raw JSON Schema — e.g.
+[`hono-openapi`](https://github.com/rhinobase/hono-openapi) on a Valibot, ArkType, or
+typia stack:
+
+```ts
+import { describeRoute } from "hono-openapi";
+import {
+  problemDetailsJsonSchema,
+  problemDetailsResponseJsonSchema,
+} from "hono-problem-details/openapi-json-schema";
+
+app.post(
+  "/reservations",
+  describeRoute({
+    responses: {
+      409: problemDetailsResponseJsonSchema(409, "Slot already taken"),
+      422: problemDetailsResponseJsonSchema(422),
+    },
+  }),
+  // ...
+);
+
+// Need the schema itself? With typed extension members:
+const schema = problemDetailsJsonSchema({
+  extensions: {
+    conflictingResources: { type: "array", items: { type: "string" } },
+  },
+});
+// Use: problemDetailsResponseJsonSchema(409, "Slot already taken", schema)
+```
+
+Extension members merge at the top level, and standard RFC 9457 fields win on key
+collision — the same rule the Zod helpers and the runtime follow
+([ADR-0002](./docs/adr/0002-extension-flatten-with-standard-field-precedence.md)).
+Each call returns a fresh object, so you can safely tweak the result (e.g. push extra
+keys into `required`) without affecting other call sites.
 
 ## Localization
 
