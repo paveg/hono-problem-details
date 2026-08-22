@@ -17,7 +17,10 @@ import {
 	getProblemDetailsSchema,
 	problemDetailsResponse,
 } from "../../dist/integrations/openapi.js";
-import type { ProblemDetailsJsonSchema } from "../../dist/integrations/openapi-json-schema.js";
+import type {
+	JsonSchemaObject,
+	ProblemDetailsJsonSchema,
+} from "../../dist/integrations/openapi-json-schema.js";
 import {
 	problemDetailsJsonSchema,
 	problemDetailsResponseJsonSchema,
@@ -88,10 +91,15 @@ const _standardHook = standardSchemaProblemHook();
 const _problemSchema = getProblemDetailsSchema();
 const _problemSchemaFactory = createProblemDetailsSchema;
 const _problemResponse = problemDetailsResponse;
+const _extensionSchema: JsonSchemaObject = { type: "array", items: { type: "string" } };
 const _problemJsonSchema: ProblemDetailsJsonSchema = problemDetailsJsonSchema({
-	extensions: { errors: { type: "array" } },
+	extensions: { errors: _extensionSchema },
 });
-const _problemJsonSchemaResponse = problemDetailsResponseJsonSchema(422);
+const _problemJsonSchemaResponse = problemDetailsResponseJsonSchema(
+	422,
+	undefined,
+	_extensionSchema,
+);
 
 void _ct;
 void _problem;
