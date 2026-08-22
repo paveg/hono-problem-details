@@ -2,7 +2,7 @@ import type {
 	ProblemDetails,
 	ProblemDetailsHandlerOptions,
 	ProblemDetailsInput,
-} from "../../dist/index.js";
+} from "hono-problem-details";
 import {
 	createProblemTypeRegistry,
 	PROBLEM_JSON_CONTENT_TYPE,
@@ -11,23 +11,23 @@ import {
 	problemDetailsHandler,
 	statusToPhrase,
 	statusToSlug,
-} from "../../dist/index.js";
+} from "hono-problem-details";
 import {
 	createProblemDetailsSchema,
 	getProblemDetailsSchema,
 	problemDetailsResponse,
-} from "../../dist/integrations/openapi.js";
+} from "hono-problem-details/openapi";
 import type {
 	JsonSchemaObject,
 	ProblemDetailsJsonSchema,
-} from "../../dist/integrations/openapi-json-schema.js";
+} from "hono-problem-details/openapi-json-schema";
 import {
 	problemDetailsJsonSchema,
 	problemDetailsResponseJsonSchema,
-} from "../../dist/integrations/openapi-json-schema.js";
-import { standardSchemaProblemHook } from "../../dist/integrations/standard-schema.js";
-import { valibotProblemHook } from "../../dist/integrations/valibot.js";
-import { zodProblemHook } from "../../dist/integrations/zod.js";
+} from "hono-problem-details/openapi-json-schema";
+import { standardSchemaProblemHook } from "hono-problem-details/standard-schema";
+import { valibotProblemHook } from "hono-problem-details/valibot";
+import { zodProblemHook } from "hono-problem-details/zod";
 
 const _ct: typeof PROBLEM_JSON_CONTENT_TYPE = PROBLEM_JSON_CONTENT_TYPE;
 
