@@ -47,6 +47,16 @@
 				"default": "./dist/integrations/openapi.cjs"
 			}
 		},
+		"./openapi-json-schema": {
+			"import": {
+				"types": "./dist/integrations/openapi-json-schema.d.ts",
+				"default": "./dist/integrations/openapi-json-schema.js"
+			},
+			"require": {
+				"types": "./dist/integrations/openapi-json-schema.d.cts",
+				"default": "./dist/integrations/openapi-json-schema.cjs"
+			}
+		},
 		"./standard-schema": {
 			"import": {
 				"types": "./dist/integrations/standard-schema.d.ts",
@@ -68,6 +78,9 @@
 			],
 			"openapi": [
 				"./dist/integrations/openapi.d.ts"
+			],
+			"openapi-json-schema": [
+				"./dist/integrations/openapi-json-schema.d.ts"
 			],
 			"standard-schema": [
 				"./dist/integrations/standard-schema.d.ts"
