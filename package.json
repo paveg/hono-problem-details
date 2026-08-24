@@ -170,7 +170,7 @@
 		"@changesets/cli": "2.31.1",
 		"@hono/standard-validator": "0.4.0",
 		"@hono/valibot-validator": "^0.6.1",
-		"@hono/zod-openapi": "1.6.0",
+		"@hono/zod-openapi": "1.6.1",
 		"@hono/zod-validator": "^0.9.0",
 		"@opentelemetry/api": "^1.0.0",
 		"@standard-schema/spec": "1.1.0",
