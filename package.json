@@ -167,7 +167,7 @@
 		"@arethetypeswrong/cli": "0.18.5",
 		"@biomejs/biome": "^2.4.14",
 		"@changesets/changelog-github": "0.7.0",
-		"@changesets/cli": "2.31.1",
+		"@changesets/cli": "3.0.1",
 		"@hono/standard-validator": "0.4.0",
 		"@hono/valibot-validator": "^0.6.1",
 		"@hono/zod-openapi": "1.6.1",
