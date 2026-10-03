@@ -1,5 +1,23 @@
 # hono-problem-details
 
+## 0.12.0
+
+### Minor Changes
+
+- [#210](https://github.com/paveg/hono-problem-details/pull/210) [`cc3064e`](https://github.com/paveg/hono-problem-details/commit/cc3064e372d14f7a79e3f01fee8d5af9e1e29d11) Thanks [@paveg](https://github.com/paveg)! - Add `onUnhandledError` handler option so errors that fall through to the generic 500 response can be logged or reported ([#207](https://github.com/paveg/hono-problem-details/issues/207)).
+
+  `problemDetailsHandler()` replaces Hono's default error handler, which `console.error`s, and previously logged nothing. The callback `(error, c) => void` runs only for the generic 500 path (not for `ProblemDetailsError`, `HTTPException`, or errors matched by `mapError`), before the response is built. A throwing callback is swallowed (ADR-0003), and its return value is not awaited. Default behavior is unchanged when the option is absent.
+
+- [#214](https://github.com/paveg/hono-problem-details/pull/214) [`3b9da26`](https://github.com/paveg/hono-problem-details/commit/3b9da262ba4ce020fb75050297e592cd6aff651e) Thanks [@paveg](https://github.com/paveg)! - Add opt-in `delegateToHandler` to `zodProblemHook`, `valibotProblemHook`, and `standardSchemaProblemHook` ([#209](https://github.com/paveg/hono-problem-details/issues/209)).
+
+  With `delegateToHandler: true` the hook throws a `ProblemDetailsError` (status 422, same `title`/`detail` defaults and sanitized `errors` extension) instead of returning a Response, so `problemDetailsHandler` produces the response and its `typePrefix`, `defaultType`, `localize`, `autoInstance`, and `otelApi` options apply to validation errors. Requires `app.onError(problemDetailsHandler())`. The default output is unchanged.
+
+### Patch Changes
+
+- [#213](https://github.com/paveg/hono-problem-details/pull/213) [`ed16acf`](https://github.com/paveg/hono-problem-details/commit/ed16acf9315c0b8bf964e4a499136ff1f5d76d3f) Thanks [@paveg](https://github.com/paveg)! - A throwing `mapError` no longer escapes the error handler. Previously the error propagated out of `app.onError` and the request rejected instead of returning a Problem Details response. The callback is now wrapped in try/catch like `localize` (ADR-0003, ADR-0005): a throwing `mapError` is ignored and the original error falls through to the standard `HTTPException` or generic-500 handling ([#208](https://github.com/paveg/hono-problem-details/issues/208)).
+
+- [#212](https://github.com/paveg/hono-problem-details/pull/212) [`64ec6c5`](https://github.com/paveg/hono-problem-details/commit/64ec6c57551028e5444616db7b27257f6dce2351) Thanks [@paveg](https://github.com/paveg)! - The handler now copies headers from `HTTPException.res` onto the problem response (including when `mapError` maps the exception), so headers such as `WWW-Authenticate` (set by `basicAuth` and `bearerAuth`) and `Retry-After` are no longer dropped. Headers that describe the original body (`Content-*`, `Transfer-Encoding`, `ETag`, `Last-Modified`, `Digest`, `Accept-Ranges`) are not copied, so the response stays `application/problem+json`, and multiple `Set-Cookie` values are preserved. An `HTTPException` without a message no longer produces an empty `detail`; the member is omitted instead.
+
 ## 0.11.0
 
 ### Minor Changes
