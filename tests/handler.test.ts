@@ -884,4 +884,54 @@ describe("problemDetailsHandler", () => {
 		expect(body.status).toBe(403);
 		expect("detail" in body).toBe(false);
 	});
+
+	it("H60: does not copy headers that describe the original representation", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new HTTPException(500, {
+				res: new Response("x", {
+					headers: {
+						"Content-Encoding": "gzip",
+						"Content-Range": "bytes 0-0/1",
+						"Content-Disposition": "attachment",
+						"Transfer-Encoding": "chunked",
+						ETag: '"abc"',
+						"Last-Modified": "Wed, 21 Oct 2015 07:28:00 GMT",
+						Digest: "sha-256=abc",
+						"Accept-Ranges": "bytes",
+						"X-Request-Id": "req-1",
+					},
+				}),
+			});
+		});
+		const res = await app.request("/");
+		for (const name of [
+			"Content-Encoding",
+			"Content-Range",
+			"Content-Disposition",
+			"Transfer-Encoding",
+			"ETag",
+			"Last-Modified",
+			"Digest",
+			"Accept-Ranges",
+		]) {
+			expect(res.headers.has(name), name).toBe(false);
+		}
+		expect(res.headers.get("X-Request-Id")).toBe("req-1");
+		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
+	});
+
+	it("H61: copies res headers when mapError maps an HTTPException", async () => {
+		const app = createApp({
+			mapError: (e) =>
+				e instanceof HTTPException ? { status: e.status, title: "Mapped" } : undefined,
+		});
+		app.use(basicAuth({ username: "u", password: "p" }));
+		app.get("/", (c) => c.text("ok"));
+		const res = await app.request("/");
+		expect(res.status).toBe(401);
+		expect(res.headers.get("WWW-Authenticate")).toBe('Basic realm="Secure Area"');
+		const body = await res.json();
+		expect(body.title).toBe("Mapped");
+	});
 });
