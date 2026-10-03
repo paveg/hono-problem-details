@@ -12,17 +12,18 @@ callback is user-provided code running inside `app.onError`, and it can throw.
 
 Three options exist for handling a thrown `localize` callback:
 
-1. **Propagate the throw** — let the `onError` handler fail, which causes Hono to re-enter
-   `onError` with the new error, potentially looping
+1. **Propagate the throw** — let the `onError` handler fail, which hands the new error
+   back to `onError` and then out of the app
 2. **Return a 500 directly** — abandon the original problem details and return an internal
    server error
 3. **Fall back to the un-localized ProblemDetails** — ignore the callback failure and continue
 
-Option 1 is dangerous: when `app.onError` itself throws an `Error`, Hono re-invokes the
-error handler exactly once more (a single bounded re-entry — not an infinite loop),
-duplicating side effects and typically ending in an unhelpful "error in error handler"
-response.
-This is a well-known footgun for Node.js and Hono error middleware.
+Option 1 is dangerous. Observed with hono 4.13.9 when a root app's `app.onError` throws
+every time: with no middleware, `onError` runs once and `app.request()` rejects; with N
+middlewares, Hono re-invokes `onError` with each new error (N + 2 calls in total, bounded,
+not an infinite loop), duplicating side effects, and the request then rejects. The client
+receives whatever the runtime adapter produces, not a Problem Details response. (This
+paragraph originally claimed exactly one re-entry; corrected in #216.)
 
 Option 2 loses the original error context. A 404 with a broken Japanese translation
 becoming a 500 "Internal Server Error" erases the user-visible information that the
@@ -42,7 +43,7 @@ if (options.localize) {
     pd = { ...pd, ...options.localize(pd, c) };
   } catch {
     // Fall through with the un-localized pd. A throwing localize must not
-    // cause the error handler itself to throw — that would re-enter onError.
+    // escape onError: Hono re-invokes onError with the new error, then rejects (ADR-0003).
   }
 }
 ```
@@ -55,7 +56,7 @@ errors inside their callback and report them explicitly (logging, Sentry, etc.).
 
 **Positive**:
 
-- `app.onError` cannot re-enter itself because of a translation bug
+- A translation bug cannot re-invoke `app.onError` or make the request reject
 - The original error shape — `status`, `type`, `title`, `detail` — is preserved even if
   translation fails
 - No special machinery required: the callback contract is "return a translated

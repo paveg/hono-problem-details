@@ -24,7 +24,8 @@ Three options exist for handling a thrown `mapError` callback:
 Option 1 is dangerous: if `mapError` throws, the error escapes `app.onError` entirely
 and the request promise rejects (observed with hono 4.13.9: the thrown error propagated
 through Hono's error dispatch chain and `await app.request()` rejected instead of
-returning a Response). What the client then receives is up to the runtime adapter,
+returning a Response). When middleware is present, Hono first re-invokes `onError` with
+the new error (see ADR-0003). What the client then receives is up to the runtime adapter,
 not this library.
 
 Option 2 loses the original error context. An error the mapping function was supposed
