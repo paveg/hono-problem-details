@@ -47,6 +47,10 @@ const _input: ProblemDetailsInput = {
 const _opts: ProblemDetailsHandlerOptions = {
 	autoInstance: true,
 	includeStack: false,
+	onUnhandledError: (error: Error, c) => {
+		const _path: string = c.req.path;
+		const _message: string = error.message;
+	},
 };
 
 const _err: ProblemDetailsError = new ProblemDetailsError({

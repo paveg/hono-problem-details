@@ -814,4 +814,60 @@ describe("problemDetailsHandler", () => {
 		const body = await res.json();
 		expect(body.type).toBe("https://api.example.com/problems/conflict");
 	});
+
+	it("H55: onUnhandledError is called once with the thrown error and context on the generic 500 path", async () => {
+		const onUnhandledError = vi.fn();
+		const app = createApp({ onUnhandledError });
+		const error = new Error("x");
+		app.get("/", () => {
+			throw error;
+		});
+		const res = await app.request("/");
+		expect(onUnhandledError).toHaveBeenCalledTimes(1);
+		const [receivedError, context] = onUnhandledError.mock.calls[0];
+		expect(receivedError).toBe(error);
+		expect(context.req.path).toBe("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.title).toBe("Internal Server Error");
+		expect(body.detail).toBe("An unexpected error occurred");
+	});
+
+	it("H56: onUnhandledError is not called for ProblemDetailsError, HTTPException, or mapError results", async () => {
+		const onUnhandledError = vi.fn();
+		const app = createApp({
+			onUnhandledError,
+			mapError: (error) =>
+				error instanceof RangeError ? { status: 422, title: "Unprocessable" } : undefined,
+		});
+		app.get("/problem", () => {
+			throw problemDetails({ status: 409, title: "Conflict" });
+		});
+		app.get("/http", () => {
+			throw new HTTPException(403, { message: "Forbidden" });
+		});
+		app.get("/mapped", () => {
+			throw new RangeError("boom");
+		});
+		expect((await app.request("/problem")).status).toBe(409);
+		expect((await app.request("/http")).status).toBe(403);
+		expect((await app.request("/mapped")).status).toBe(422);
+		expect(onUnhandledError).not.toHaveBeenCalled();
+	});
+
+	it("H57: a throwing onUnhandledError still yields the normal 500 problem response", async () => {
+		const app = createApp({
+			onUnhandledError: () => {
+				throw new Error("logger down");
+			},
+		});
+		app.get("/", () => {
+			throw new Error("x");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.title).toBe("Internal Server Error");
+		expect(body.detail).toBe("An unexpected error occurred");
+	});
 });
