@@ -210,6 +210,18 @@ problemDetailsHandler({
 Keep `includeStack` off in production — stack traces should not leave the server even via
 opt-in extension fields.
 
+Unlike Hono's default error handler, `problemDetailsHandler()` does not log anything. Pass
+`onUnhandledError` to log (or report) errors that fall through to the generic 500. It is not
+called for `ProblemDetailsError`, `HTTPException`, or errors matched by `mapError`:
+
+```ts
+app.onError(
+  problemDetailsHandler({
+    onUnhandledError: (err) => console.error(err),
+  }),
+);
+```
+
 ## Extension Members
 
 Extension members are flattened to top level per RFC 9457:
@@ -574,6 +586,11 @@ problemDetailsHandler({
     const lang = c.req.header("Accept-Language") ?? "en";
     return { title: `[${lang}] ${pd.title}` };
   },
+
+  // Called for errors that become the generic 500 (not ProblemDetailsError, HTTPException,
+  // or mapError results). The handler doesn't log by default; use this to restore logging.
+  // A throwing callback is swallowed; the return value is not awaited.
+  onUnhandledError: (err, c) => console.error(err),
 
   // Custom error mapping
   mapError: (error) => {
