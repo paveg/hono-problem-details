@@ -990,4 +990,42 @@ describe("problemDetailsHandler", () => {
 		const body = await res.json();
 		expect(body.title).toBe("Mapped");
 	});
+
+	it("H65: mapError throwing Error falls back to un-mapped 500 response", async () => {
+		const app = createApp({
+			mapError: () => {
+				throw new Error("mapError failed");
+			},
+		});
+		app.get("/", () => {
+			throw new Error("original error");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.status).toBe(500);
+		expect(body.title).toBe("Internal Server Error");
+		expect(body.detail).toBe("An unexpected error occurred");
+		expect(body.detail).not.toContain("mapError failed");
+		expect(body.detail).not.toContain("original error");
+	});
+
+	it("H66: mapError throwing, route throws HTTPException → responds with HTTPException", async () => {
+		const app = createApp({
+			mapError: () => {
+				throw new Error("mapError failed");
+			},
+		});
+		app.get("/", () => {
+			throw new HTTPException(404, { message: "Not Found" });
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(404);
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.status).toBe(404);
+		expect(body.title).toBe("Not Found");
+		expect(body.detail).toBe("Not Found");
+	});
 });

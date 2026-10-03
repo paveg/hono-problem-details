@@ -592,7 +592,8 @@ problemDetailsHandler({
   // A throwing callback is swallowed; the return value is not awaited.
   onUnhandledError: (err, c) => console.error(err),
 
-  // Custom error mapping
+  // Custom error mapping. A throwing callback is silently swallowed
+  // and the error is handled as if mapError returned undefined.
   mapError: (error) => {
     if (error instanceof MyCustomError) {
       return {
