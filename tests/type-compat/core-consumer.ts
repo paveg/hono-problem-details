@@ -89,7 +89,7 @@ const _autoCodeError: ProblemDetailsError = _autoCodeRegistry.create("ORDER_CONF
 const _phrase: string | undefined = statusToPhrase(404);
 const _slug: string | undefined = statusToSlug(404);
 
-const _zodHook = zodProblemHook();
+const _zodHook = zodProblemHook({ delegateToHandler: true });
 const _valibotHook = valibotProblemHook();
 const _standardHook = standardSchemaProblemHook();
 const _problemSchema = getProblemDetailsSchema();

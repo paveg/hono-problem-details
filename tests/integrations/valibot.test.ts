@@ -4,7 +4,16 @@ import type { Env } from "hono";
 import { Hono } from "hono";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
+import { problemDetailsHandler } from "../../src/handler.js";
 import { valibotProblemHook } from "../../src/integrations/valibot.js";
+
+function delegatingHandler() {
+	return problemDetailsHandler({
+		typePrefix: "https://example.com/problems",
+		autoInstance: true,
+		localize: (pd) => ({ title: `[ja] ${pd.title}` }),
+	});
+}
 
 function createApp(hookOptions?: Parameters<typeof valibotProblemHook>[0]) {
 	const app = new Hono();
@@ -163,5 +172,58 @@ describe("valibotProblemHook", () => {
 		const body = await res.json();
 		expect(body.title).toBe("Custom Validation Error");
 		expect(body.detail).toBe("Please check your input");
+	});
+
+	it("V10: delegateToHandler routes through problemDetailsHandler options", async () => {
+		const app = createApp({ delegateToHandler: true });
+		app.onError(delegatingHandler());
+		const res = await app.request("/users", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email: "invalid", age: 25 }),
+		});
+		expect(res.status).toBe(422);
+		expect(res.headers.get("Content-Type")).toBe("application/problem+json; charset=utf-8");
+		const body = await res.json();
+		expect(body.type).toBe("https://example.com/problems/unprocessable-content");
+		expect(body.title).toBe("[ja] Validation Error");
+		expect(body.detail).toBe("Request validation failed");
+		expect(body.instance).toBe("/users");
+		expect(body.errors).toHaveLength(1);
+		expect(body.errors[0].field).toBe("email");
+		expect(body.errors[0].code).toBe("email");
+	});
+
+	it("V11: delegateToHandler forwards custom title and detail", async () => {
+		const app = createApp({
+			delegateToHandler: true,
+			title: "Bad Input",
+			detail: "Please check your data",
+		});
+		app.onError(delegatingHandler());
+		const res = await app.request("/users", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email: "invalid", age: 25 }),
+		});
+		expect(res.status).toBe(422);
+		const body = await res.json();
+		expect(body.title).toBe("[ja] Bad Input");
+		expect(body.detail).toBe("Please check your data");
+	});
+
+	it("V12: without delegateToHandler the handler options do not apply", async () => {
+		const app = createApp();
+		app.onError(delegatingHandler());
+		const res = await app.request("/users", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email: "invalid", age: 25 }),
+		});
+		expect(res.status).toBe(422);
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.title).toBe("Validation Error");
+		expect(body.instance).toBeUndefined();
 	});
 });
