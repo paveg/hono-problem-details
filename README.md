@@ -354,6 +354,17 @@ app.post("/users", zValidator("json", schema, zodProblemHook()), (c) => {
 // }
 ```
 
+By default the hooks build the response themselves, so `problemDetailsHandler` options (`typePrefix`, `defaultType`, `localize`, `autoInstance`, `otelApi`) do not apply to validation errors. Pass `delegateToHandler: true` to any of the validator hooks (`zodProblemHook`, `valibotProblemHook`, `standardSchemaProblemHook`) to throw a `ProblemDetailsError` instead and let the handler produce the response. This requires `app.onError(problemDetailsHandler(...))`:
+
+```ts
+app.onError(problemDetailsHandler({ typePrefix: "https://example.com/problems", autoInstance: true }));
+
+app.post("/users", zValidator("json", schema, zodProblemHook({ delegateToHandler: true })), (c) => {
+  // ...
+});
+// type: "https://example.com/problems/unprocessable-content", instance: "/users"
+```
+
 ## Valibot Validator Integration
 
 ```ts
@@ -538,7 +549,7 @@ problemDetailsHandler({
 });
 ```
 
-When enabled, the handler adds a `traceId` extension member to every response it produces (thrown `ProblemDetailsError`s, `HTTPException`s, and unhandled errors) when a trace is active. Validation-hook responses (`zodProblemHook`, `valibotProblemHook`, `standardSchemaProblemHook`) are returned directly by the validator and never pass through the handler, so they do not carry `traceId`. 
+When enabled, the handler adds a `traceId` extension member to every response it produces (thrown `ProblemDetailsError`s, `HTTPException`s, and unhandled errors) when a trace is active. Validation-hook responses (`zodProblemHook`, `valibotProblemHook`, `standardSchemaProblemHook`) are returned directly by the validator and never pass through the handler, so they do not carry `traceId` unless you set `delegateToHandler: true` (see [Zod Validator Integration](#zod-validator-integration)). 
 This allows clients to correlate errors with server-side traces for easier debugging.
 
 ## Handler Options

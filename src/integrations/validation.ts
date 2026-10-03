@@ -1,3 +1,4 @@
+import { ProblemDetailsError } from "../error.js";
 import { PROBLEM_JSON_CONTENT_TYPE } from "../utils.js";
 
 export interface ValidationError {
@@ -9,6 +10,13 @@ export interface ValidationError {
 export interface ValidationHookOptions {
 	title?: string;
 	detail?: string;
+	/**
+	 * Throw a `ProblemDetailsError` instead of returning a Response, so
+	 * `problemDetailsHandler` builds the response and its options (`typePrefix`,
+	 * `defaultType`, `localize`, `autoInstance`, `otelApi`) apply. Requires
+	 * `app.onError(problemDetailsHandler())`. Default: `false`.
+	 */
+	delegateToHandler?: boolean;
 }
 
 /**
@@ -37,12 +45,25 @@ export function buildValidationResponse(
 	errors: ValidationError[],
 	options?: ValidationHookOptions,
 ): Response {
+	const title = options?.title ?? "Validation Error";
+	const detail = options?.detail ?? "Request validation failed";
+	const sanitizedErrors = errors.map(sanitizeError);
+
+	if (options?.delegateToHandler) {
+		throw new ProblemDetailsError({
+			status: 422,
+			title,
+			detail,
+			extensions: { errors: sanitizedErrors },
+		});
+	}
+
 	const body = {
 		type: "about:blank",
 		status: 422,
-		title: options?.title ?? "Validation Error",
-		detail: options?.detail ?? "Request validation failed",
-		errors: errors.map(sanitizeError),
+		title,
+		detail,
+		errors: sanitizedErrors,
 	};
 
 	return new Response(JSON.stringify(body), {

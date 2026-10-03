@@ -3,7 +3,32 @@ import { Hono } from "hono";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
+import { problemDetailsHandler } from "../../src/handler.js";
 import { standardSchemaProblemHook } from "../../src/integrations/standard-schema.js";
+
+function createDelegationApp(hookOptions?: Parameters<typeof standardSchemaProblemHook>[0]) {
+	const app = new Hono();
+	const schema = z.object({ email: z.string().email() });
+	app.post("/test", sValidator("json", schema, standardSchemaProblemHook(hookOptions)), (c) =>
+		c.json({ ok: true }),
+	);
+	app.onError(
+		problemDetailsHandler({
+			typePrefix: "https://example.com/problems",
+			autoInstance: true,
+			localize: (pd) => ({ title: `[ja] ${pd.title}` }),
+		}),
+	);
+	return app;
+}
+
+function postInvalidEmail(app: Hono) {
+	return app.request("/test", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ email: "invalid" }),
+	});
+}
 
 describe("standardSchemaProblemHook", () => {
 	it("S1: returns nothing on success (Zod)", async () => {
@@ -196,5 +221,43 @@ describe("standardSchemaProblemHook", () => {
 		});
 		const body = await res.json();
 		expect(body.errors[0].field).toBe("");
+	});
+
+	it("S10: delegateToHandler routes through problemDetailsHandler options", async () => {
+		const app = createDelegationApp({ delegateToHandler: true });
+		const res = await postInvalidEmail(app);
+		expect(res.status).toBe(422);
+		expect(res.headers.get("Content-Type")).toBe("application/problem+json; charset=utf-8");
+		const body = await res.json();
+		expect(body.type).toBe("https://example.com/problems/unprocessable-content");
+		expect(body.title).toBe("[ja] Validation Error");
+		expect(body.detail).toBe("Request validation failed");
+		expect(body.instance).toBe("/test");
+		expect(body.errors).toHaveLength(1);
+		expect(body.errors[0].field).toBe("email");
+		expect(body.errors[0].message).toBeDefined();
+	});
+
+	it("S11: delegateToHandler forwards custom title and detail", async () => {
+		const app = createDelegationApp({
+			delegateToHandler: true,
+			title: "Bad Input",
+			detail: "Please check your data",
+		});
+		const res = await postInvalidEmail(app);
+		expect(res.status).toBe(422);
+		const body = await res.json();
+		expect(body.title).toBe("[ja] Bad Input");
+		expect(body.detail).toBe("Please check your data");
+	});
+
+	it("S12: without delegateToHandler the handler options do not apply", async () => {
+		const app = createDelegationApp();
+		const res = await postInvalidEmail(app);
+		expect(res.status).toBe(422);
+		const body = await res.json();
+		expect(body.type).toBe("about:blank");
+		expect(body.title).toBe("Validation Error");
+		expect(body.instance).toBeUndefined();
 	});
 });
