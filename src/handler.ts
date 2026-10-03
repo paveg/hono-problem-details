@@ -92,6 +92,14 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 			);
 		}
 
+		if (options.onUnhandledError) {
+			try {
+				options.onUnhandledError(error, c);
+			} catch {
+				// Same rationale as localize (ADR-0003): a throwing callback must not re-enter onError.
+			}
+		}
+
 		return toResponse(
 			{
 				status: 500,
