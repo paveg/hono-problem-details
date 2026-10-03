@@ -199,6 +199,35 @@ describe("zodProblemHook", () => {
 		expect(body.detail).toBe("Please check your data");
 	});
 
+	it("Z13: delegateToHandler strips C0 control characters from field and message", async () => {
+		const app = new Hono();
+		const fieldName = "name\x01ctrl";
+		const schema = z.object({
+			[fieldName]: z.string({ message: "required\x07bell\nline" }),
+		});
+		app.post(
+			"/ctrl",
+			zValidator("json", schema, zodProblemHook({ delegateToHandler: true })),
+			(c) => c.text("ok"),
+		);
+		app.onError(delegatingHandler());
+		const res = await app.request("/ctrl", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({}),
+		});
+		expect(res.status).toBe(422);
+		const body = (await res.json()) as { errors: { field: string; message: string }[] };
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: assertion target
+		const ctrlRe = /[\x00-\x1f\x7f]/;
+		for (const err of body.errors) {
+			expect(err.field).not.toMatch(ctrlRe);
+			expect(err.message).not.toMatch(ctrlRe);
+		}
+		expect(body.errors.some((e) => e.field === "namectrl")).toBe(true);
+		expect(body.errors.some((e) => e.message === "requiredbellline")).toBe(true);
+	});
+
 	it("Z12: without delegateToHandler the handler options do not apply", async () => {
 		const app = createApp();
 		app.onError(delegatingHandler());
