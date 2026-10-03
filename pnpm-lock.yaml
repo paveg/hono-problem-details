@@ -22,8 +22,8 @@ importers:
         specifier: ^2.4.14
         version: 2.5.14
       '@changesets/changelog-github':
-        specifier: 0.7.0
-        version: 0.7.0
+        specifier: 1.0.1
+        version: 1.0.1
       '@changesets/cli':
         specifier: 3.0.3
         version: 3.0.3
@@ -185,8 +185,9 @@ packages:
     resolution: {integrity: sha512-3Dst2Ime2Op5nd4XmWJLPIgp11ZFqJqSkVug9izK6TDcIV4YlhPS4ECbEVR+eGI0bk0r1ItogD4j2Oli87bJrA==}
     engines: {node: ^22.11 || ^24 || >=26}
 
-  '@changesets/changelog-github@0.7.0':
-    resolution: {integrity: sha512-rBsbRvc4TVn+FvFnOVM3LxlFJfTXXCp8gfVJ+0BubxWNSVnLuAzowi5j+IEraLLP52w8AAs9QfKbPS3MMiXQJA==}
+  '@changesets/changelog-github@1.0.1':
+    resolution: {integrity: sha512-QUcrV7878yHlWPXXPA6gqSxNKwtVHCd1K22L7ZAoJw2yGy8K4QvjwOStD75+1Q9KD9ZSUgGS94HuYdd7HOVtpA==}
+    engines: {node: ^22.11 || ^24 || >=26}
 
   '@changesets/cli@3.0.3':
     resolution: {integrity: sha512-L1i67bMfkK6iC/kDejuNO4pFgTRcWIObsD6Qof2woP1I4M8tj17DGlcpRaTzTv1DYSP5EMwWdEtR8X0Pj5Jg3Q==}
@@ -209,8 +210,9 @@ packages:
     resolution: {integrity: sha512-ji/t5wFA1zREKXRUePE6Qi+Qu2UgxCeSSGQrphezwvQZrp49B7sJ+8+wvM0tA7zPeSxYKCojDy3WWgrl+s+awg==}
     engines: {node: ^22.11 || ^24 || >=26}
 
-  '@changesets/get-github-info@0.8.0':
-    resolution: {integrity: sha512-cRnC+xdF0JIik7coko3iUP9qbnfi1iJQ3sAa6dE+Tx3+ET8bjFEm63PA4WEohgjYcmsOikPHWzPsMWWiZmntOQ==}
+  '@changesets/get-github-info@1.0.1':
+    resolution: {integrity: sha512-ifLQCky/ZtDgZ4xCiUMjnLZSJ8xk52iIzMJbBBPlZWjr2CiTNTaTDddIVWKicrUAdWuLWL7PUw2fNa1yPwLpIg==}
+    engines: {node: ^22.11 || ^24 || >=26}
 
   '@changesets/git@4.0.1':
     resolution: {integrity: sha512-6vWpIAC4LkpmlqaIu37ViT5enyd9+uBwAiGqCGhASvkSHBgx4PrtTGXWTMFYpDmZbjgyonyVgMciPrW4MqtJsA==}
@@ -231,9 +233,6 @@ packages:
   '@changesets/should-skip-package@1.0.0':
     resolution: {integrity: sha512-pwqoJmbONn1XgXmZXPEExgAaT+HdZLjALFTDgIm+PnS5KeO2nLtzA2/Q+4aMFY14kFMuXKG30MObhvDzWgzDgg==}
     engines: {node: ^22.11 || ^24 || >=26}
-
-  '@changesets/types@6.1.0':
-    resolution: {integrity: sha512-rKQcJ+o1nKNgeoYRHKOS07tAMNd3YSN0uHaJOZYjBAgxfV7TUE7JE+z4BzZdQwb5hKaYbayKN5KrYV7ODb2rAA==}
 
   '@changesets/types@7.0.0':
     resolution: {integrity: sha512-c5GoiQyt3pxiXjrWSNoP8/GRf4kG+VnKzovx1OQM8dYYALlSwgedmkPmJ+ZqGxqwg9D3Bkj85Uo4KLd5BN3A0w==}
@@ -1317,8 +1316,8 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
-  dataloader@1.4.0:
-    resolution: {integrity: sha512-68s5jYdlvasItOJnCuI2Q9s4q98g0pCyL3HrcKJu8KNugUl8ahgmZYg38ysLTgQjjXX3H8CJLkAvWrclWfcalw==}
+  dataloader@2.2.3:
+    resolution: {integrity: sha512-y2krtASINtPFS1rSDjacrFgn1dcUuoREVabwlOGOe4SdxenREqwjwjElAdwvbGM7kgZz9a3KVicWR7vcz8rnzA==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -1328,10 +1327,6 @@ packages:
     peerDependenciesMeta:
       supports-color:
         optional: true
-
-  dotenv@8.6.0:
-    resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
-    engines: {node: '>=10'}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -1581,15 +1576,6 @@ packages:
     resolution: {integrity: sha512-Z3lTE9pLaJF47NyMhd4ww1yFTAP8YhYI8SleJiHzM46Fgpm5cnNzSl9XfzFNqbaz+VlJrIj3fXQ4DeN1Rjm6cw==}
     engines: {node: '>=18'}
 
-  node-fetch@2.7.0:
-    resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
-    engines: {node: 4.x || >=6.0.0}
-    peerDependencies:
-      encoding: ^0.1.0
-    peerDependenciesMeta:
-      encoding:
-        optional: true
-
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
@@ -1779,9 +1765,6 @@ packages:
     resolution: {integrity: sha512-yau8yJdTt989Mm0Bd/236QnzEiPf2xLLTqUZRUJOo/3CB078LSwzei343DgtJVmfJKJE3TMINY1u42SQsP6mXw==}
     engines: {node: '>=14.0.0'}
 
-  tr46@0.0.3:
-    resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
-
   tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
     hasBin: true
@@ -1929,12 +1912,6 @@ packages:
     resolution: {integrity: sha512-3hu+tD8YzSLGuFYtPRb48vdhKMi0KQV5sn+uWr8+7dMEq/2G/dtLrdDinkLjqq5TIbIBjYJ4Ax/n3YiaW7QM8A==}
     engines: {node: 20 || >=22}
 
-  webidl-conversions@3.0.1:
-    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
-
-  whatwg-url@5.0.0:
-    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
-
   why-is-node-running@2.3.0:
     resolution: {integrity: sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==}
     engines: {node: '>=8'}
@@ -2069,13 +2046,10 @@ snapshots:
     dependencies:
       '@changesets/types': 7.0.0
 
-  '@changesets/changelog-github@0.7.0':
+  '@changesets/changelog-github@1.0.1':
     dependencies:
-      '@changesets/get-github-info': 0.8.0
-      '@changesets/types': 6.1.0
-      dotenv: 8.6.0
-    transitivePeerDependencies:
-      - encoding
+      '@changesets/get-github-info': 1.0.1
+      '@changesets/types': 7.0.0
 
   '@changesets/cli@3.0.3':
     dependencies:
@@ -2121,12 +2095,9 @@ snapshots:
       '@changesets/types': 7.0.0
       semver: 7.8.5
 
-  '@changesets/get-github-info@0.8.0':
+  '@changesets/get-github-info@1.0.1':
     dependencies:
-      dataloader: 1.4.0
-      node-fetch: 2.7.0
-    transitivePeerDependencies:
-      - encoding
+      dataloader: 2.2.3
 
   '@changesets/git@4.0.1':
     dependencies:
@@ -2156,8 +2127,6 @@ snapshots:
   '@changesets/should-skip-package@1.0.0':
     dependencies:
       '@changesets/types': 7.0.0
-
-  '@changesets/types@6.1.0': {}
 
   '@changesets/types@7.0.0': {}
 
@@ -2854,13 +2823,11 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
-  dataloader@1.4.0: {}
+  dataloader@2.2.3: {}
 
   debug@4.4.3:
     dependencies:
       ms: 2.1.3
-
-  dotenv@8.6.0: {}
 
   emoji-regex@8.0.0: {}
 
@@ -3136,10 +3103,6 @@ snapshots:
       emojilib: 2.4.0
       skin-tone: 2.0.0
 
-  node-fetch@2.7.0:
-    dependencies:
-      whatwg-url: 5.0.0
-
   object-assign@4.1.1: {}
 
   obug@2.1.4: {}
@@ -3381,8 +3344,6 @@ snapshots:
 
   tinyrainbow@3.1.1: {}
 
-  tr46@0.0.3: {}
-
   tree-kill@1.2.2: {}
 
   ts-interface-checker@0.1.13: {}
@@ -3476,13 +3437,6 @@ snapshots:
       - msw
 
   walk-up-path@4.0.0: {}
-
-  webidl-conversions@3.0.1: {}
-
-  whatwg-url@5.0.0:
-    dependencies:
-      tr46: 0.0.3
-      webidl-conversions: 3.0.1
 
   why-is-node-running@2.3.0:
     dependencies:
