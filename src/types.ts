@@ -77,6 +77,9 @@ export interface ProblemDetailsHandlerOptions {
 	 * Localize title/detail before sending the response.
 	 * Returned fields are merged onto the original ProblemDetails, so callers may
 	 * return a partial patch (e.g. `{ title: "..." }`) or omit the return entirely.
+	 * The merge is shallow: a returned `extensions` replaces all extension members,
+	 * so spread `pd.extensions` to keep `code`, `traceId`, or validation `errors`.
+	 * A throwing callback is swallowed and the un-localized response is sent (ADR-0003).
 	 */
 	localize?: (pd: ProblemDetails, c: Context) => Partial<ProblemDetails> | undefined;
 	/**

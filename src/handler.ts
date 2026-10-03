@@ -63,8 +63,8 @@ function toResponse(
 		try {
 			pd = { ...pd, ...options.localize(pd, c) };
 		} catch {
-			// Fall through with the un-localized pd. A throwing localize must not
-			// cause the error handler itself to throw — that would re-enter onError.
+			// Fall through with the un-localized pd. A throwing localize must not escape
+			// onError: Hono re-invokes onError with the new error, then rejects (ADR-0003).
 		}
 	}
 
@@ -124,7 +124,7 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 			try {
 				options.onUnhandledError(error, c);
 			} catch {
-				// Same rationale as localize (ADR-0003): a throwing callback must not re-enter onError.
+				// Same rationale as localize (ADR-0003): a throwing callback must not escape onError.
 			}
 		}
 

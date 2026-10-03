@@ -539,14 +539,19 @@ problemDetailsHandler({
 
 The callback receives the fully-built `ProblemDetails` object and the Hono `Context`, allowing access to headers like `Accept-Language`. Return a new `ProblemDetails` with translated fields.
 
+> **Note on extensions**: The patch is merged shallowly, so returning `extensions` replaces
+> all extension members (`code`, `traceId`, validation `errors`, ...). Spread the original
+> to keep them: `return { extensions: { ...pd.extensions, hint: translate(lang, "hint") } }`.
+
 > **Note on caching**: If your responses vary by `Accept-Language`, add `Vary: Accept-Language`
 > from your own middleware so CDNs and browser caches don't serve the wrong translation.
 > This middleware intentionally does not set `Vary` — error handlers shouldn't mutate
 > request-scope headers that also apply to successful responses.
 
 > **Note on failures**: If your `localize` callback throws, the handler falls back to the
-> un-localized `ProblemDetails` and continues. Throwing from inside `app.onError` would cause
-> the error handler to re-enter itself, so the swallow is deliberate. Catch errors inside your
+> un-localized `ProblemDetails` and continues. Hono hands an error thrown from inside
+> `app.onError` back to `onError` (several times when middleware is present), and if it keeps
+> throwing, the request rejects, so the swallow is deliberate. Catch errors inside your
 > callback if you need to observe them.
 
 ## OpenTelemetry Integration
