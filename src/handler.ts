@@ -6,12 +6,32 @@ import { statusToPhrase, statusToSlug } from "./status.js";
 import type { ProblemDetailsHandlerOptions, ProblemDetailsInput } from "./types.js";
 import { buildProblemResponse, normalizeProblemDetails } from "./utils.js";
 
+// Describe the original response body, which is replaced by the problem JSON.
+const REPRESENTATION_HEADERS = new Set([
+	"transfer-encoding",
+	"etag",
+	"last-modified",
+	"digest",
+	"accept-ranges",
+]);
+
 function buildType(status: number, options: ProblemDetailsHandlerOptions): string {
 	if (options.typePrefix) {
 		const slug = statusToSlug(status);
 		if (slug) return `${options.typePrefix}/${slug}`;
 	}
 	return options.defaultType ?? "about:blank";
+}
+
+function copyResHeaders(error: Error, response: Response): Response {
+	if (error instanceof HTTPException) {
+		error.res?.headers.forEach((value, name) => {
+			if (!name.startsWith("content-") && !REPRESENTATION_HEADERS.has(name)) {
+				response.headers.append(name, value);
+			}
+		});
+	}
+	return response;
 }
 
 function toResponse(
@@ -77,24 +97,35 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 			try {
 				const mapped = options.mapError(error);
 				if (mapped) {
-					return toResponse(mapped, c, options);
+					return copyResHeaders(error, toResponse(mapped, c, options));
 				}
 			} catch {
 				// Fall through as if mapError returned undefined. A throwing mapError must not
-				// cause the error handler itself to throw — that would re-enter onError.
+				// escape onError, or the request rejects instead of getting a response (ADR-0005).
 			}
 		}
 
 		if (error instanceof HTTPException) {
-			return toResponse(
-				{
-					status: error.status,
-					title: statusToPhrase(error.status),
-					detail: error.message,
-				},
-				c,
-				options,
+			return copyResHeaders(
+				error,
+				toResponse(
+					{
+						status: error.status,
+						title: statusToPhrase(error.status),
+						detail: error.message || undefined,
+					},
+					c,
+					options,
+				),
 			);
+		}
+
+		if (options.onUnhandledError) {
+			try {
+				options.onUnhandledError(error, c);
+			} catch {
+				// Same rationale as localize (ADR-0003): a throwing callback must not re-enter onError.
+			}
 		}
 
 		return toResponse(

@@ -22,9 +22,10 @@ Three options exist for handling a thrown `mapError` callback:
    the original error, treating it as if `mapError` returned undefined
 
 Option 1 is dangerous: if `mapError` throws, the error escapes `app.onError` entirely
-and the request promise rejects (observed in H55/H56 before the fix: the thrown error
-propagated through Hono's error dispatch chain and the test's `await app.request()`
-rejected instead of returning a Response). The client receives no response body.
+and the request promise rejects (observed with hono 4.13.9: the thrown error propagated
+through Hono's error dispatch chain and `await app.request()` rejected instead of
+returning a Response). What the client then receives is up to the runtime adapter,
+not this library.
 
 Option 2 loses the original error context. An error the mapping function was supposed
 to handle becomes a generic 500, erasing the client-relevant information.
@@ -43,11 +44,11 @@ if (options.mapError) {
   try {
     const mapped = options.mapError(error);
     if (mapped) {
-      return toResponse(mapped, c, options);
+      return copyResHeaders(error, toResponse(mapped, c, options));
     }
   } catch {
     // Fall through as if mapError returned undefined. A throwing mapError must not
-    // cause the error handler itself to throw — that would re-enter onError.
+    // escape onError, or the request rejects instead of getting a response (ADR-0005).
   }
 }
 ```

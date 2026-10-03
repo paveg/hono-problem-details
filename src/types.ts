@@ -79,6 +79,13 @@ export interface ProblemDetailsHandlerOptions {
 	 * return a partial patch (e.g. `{ title: "..." }`) or omit the return entirely.
 	 */
 	localize?: (pd: ProblemDetails, c: Context) => Partial<ProblemDetails> | undefined;
+	/**
+	 * Called for errors that fall through to the generic 500 response, before it is built.
+	 * Not called for `ProblemDetailsError`, `HTTPException`, or errors matched by `mapError`.
+	 * A throwing callback is swallowed. The return value is not awaited: do async work
+	 * fire-and-forget and catch its rejections yourself.
+	 */
+	onUnhandledError?: (error: Error, c: Context) => void;
 }
 
 export interface OtelApiLike {

@@ -1,10 +1,13 @@
 import { Hono } from "hono";
+import { basicAuth } from "hono/basic-auth";
+import { bearerAuth } from "hono/bearer-auth";
 import { HTTPException } from "hono/http-exception";
 import { describe, expect, it, vi } from "vitest";
 import { problemDetails } from "../src/factory.js";
 import { problemDetailsHandler } from "../src/handler.js";
 import { createProblemTypeRegistry } from "../src/registry.js";
 import type { OtelApiLike } from "../src/types.js";
+import { PROBLEM_JSON_CONTENT_TYPE } from "../src/utils.js";
 
 function createApp(options?: Parameters<typeof problemDetailsHandler>[0]) {
 	const app = new Hono();
@@ -815,7 +818,180 @@ describe("problemDetailsHandler", () => {
 		expect(body.type).toBe("https://api.example.com/problems/conflict");
 	});
 
-	it("H55: mapError throwing Error falls back to un-mapped 500 response", async () => {
+	it("H55: onUnhandledError is called once with the thrown error and context on the generic 500 path", async () => {
+		const onUnhandledError = vi.fn();
+		const app = createApp({ onUnhandledError });
+		const error = new Error("x");
+		app.get("/", () => {
+			throw error;
+		});
+		const res = await app.request("/");
+		expect(onUnhandledError).toHaveBeenCalledTimes(1);
+		const [receivedError, context] = onUnhandledError.mock.calls[0];
+		expect(receivedError).toBe(error);
+		expect(context.req.path).toBe("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.title).toBe("Internal Server Error");
+		expect(body.detail).toBe("An unexpected error occurred");
+	});
+
+	it("H56: onUnhandledError is not called for ProblemDetailsError, HTTPException, or mapError results", async () => {
+		const onUnhandledError = vi.fn();
+		const app = createApp({
+			onUnhandledError,
+			mapError: (error) =>
+				error instanceof RangeError ? { status: 422, title: "Unprocessable" } : undefined,
+		});
+		app.get("/problem", () => {
+			throw problemDetails({ status: 409, title: "Conflict" });
+		});
+		app.get("/http", () => {
+			throw new HTTPException(403, { message: "Forbidden" });
+		});
+		app.get("/mapped", () => {
+			throw new RangeError("boom");
+		});
+		expect((await app.request("/problem")).status).toBe(409);
+		expect((await app.request("/http")).status).toBe(403);
+		expect((await app.request("/mapped")).status).toBe(422);
+		expect(onUnhandledError).not.toHaveBeenCalled();
+	});
+
+	it("H57: a throwing onUnhandledError still yields the normal 500 problem response", async () => {
+		const app = createApp({
+			onUnhandledError: () => {
+				throw new Error("logger down");
+			},
+		});
+		app.get("/", () => {
+			throw new Error("x");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.title).toBe("Internal Server Error");
+		expect(body.detail).toBe("An unexpected error occurred");
+	});
+
+	it("H58: preserves WWW-Authenticate from basicAuth on 401", async () => {
+		const app = createApp();
+		app.use(basicAuth({ username: "u", password: "p" }));
+		app.get("/", (c) => c.text("ok"));
+		const res = await app.request("/");
+		expect(res.status).toBe(401);
+		expect(res.headers.get("WWW-Authenticate")).toBe('Basic realm="Secure Area"');
+		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
+	});
+
+	it("H59: preserves WWW-Authenticate from bearerAuth on 401", async () => {
+		const app = createApp();
+		app.use(bearerAuth({ token: "secret" }));
+		app.get("/", (c) => c.text("ok"));
+		const res = await app.request("/");
+		expect(res.status).toBe(401);
+		expect(res.headers.get("WWW-Authenticate")).toContain("Bearer");
+		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
+	});
+
+	it("H60: copies res headers but keeps problem+json content type and body", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new HTTPException(429, {
+				message: "Slow down",
+				res: new Response("ignored", {
+					status: 200,
+					headers: {
+						"Retry-After": "30",
+						"Content-Type": "text/plain",
+						"Content-Length": "7",
+					},
+				}),
+			});
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(429);
+		expect(res.headers.get("Retry-After")).toBe("30");
+		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
+		const body = await res.json();
+		expect(body.detail).toBe("Slow down");
+		expect(res.headers.get("Content-Length")).not.toBe("7");
+	});
+
+	it("H61: preserves multiple Set-Cookie headers from res", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			const headers = new Headers();
+			headers.append("Set-Cookie", "a=1");
+			headers.append("Set-Cookie", "b=2");
+			throw new HTTPException(401, { res: new Response(null, { headers }) });
+		});
+		const res = await app.request("/");
+		expect(res.headers.getSetCookie()).toEqual(["a=1", "b=2"]);
+	});
+
+	it("H62: omits detail when HTTPException has no message", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new HTTPException(403);
+		});
+		const res = await app.request("/");
+		const body = await res.json();
+		expect(body.status).toBe(403);
+		expect("detail" in body).toBe(false);
+	});
+
+	it("H63: does not copy headers that describe the original representation", async () => {
+		const app = createApp();
+		app.get("/", () => {
+			throw new HTTPException(500, {
+				res: new Response("x", {
+					headers: {
+						"Content-Encoding": "gzip",
+						"Content-Range": "bytes 0-0/1",
+						"Content-Disposition": "attachment",
+						"Transfer-Encoding": "chunked",
+						ETag: '"abc"',
+						"Last-Modified": "Wed, 21 Oct 2015 07:28:00 GMT",
+						Digest: "sha-256=abc",
+						"Accept-Ranges": "bytes",
+						"X-Request-Id": "req-1",
+					},
+				}),
+			});
+		});
+		const res = await app.request("/");
+		for (const name of [
+			"Content-Encoding",
+			"Content-Range",
+			"Content-Disposition",
+			"Transfer-Encoding",
+			"ETag",
+			"Last-Modified",
+			"Digest",
+			"Accept-Ranges",
+		]) {
+			expect(res.headers.has(name), name).toBe(false);
+		}
+		expect(res.headers.get("X-Request-Id")).toBe("req-1");
+		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
+	});
+
+	it("H64: copies res headers when mapError maps an HTTPException", async () => {
+		const app = createApp({
+			mapError: (e) =>
+				e instanceof HTTPException ? { status: e.status, title: "Mapped" } : undefined,
+		});
+		app.use(basicAuth({ username: "u", password: "p" }));
+		app.get("/", (c) => c.text("ok"));
+		const res = await app.request("/");
+		expect(res.status).toBe(401);
+		expect(res.headers.get("WWW-Authenticate")).toBe('Basic realm="Secure Area"');
+		const body = await res.json();
+		expect(body.title).toBe("Mapped");
+	});
+
+	it("H65: mapError throwing Error falls back to un-mapped 500 response", async () => {
 		const app = createApp({
 			mapError: () => {
 				throw new Error("mapError failed");
@@ -835,7 +1011,7 @@ describe("problemDetailsHandler", () => {
 		expect(body.detail).not.toContain("original error");
 	});
 
-	it("H56: mapError throwing, route throws HTTPException → responds with HTTPException", async () => {
+	it("H66: mapError throwing, route throws HTTPException → responds with HTTPException", async () => {
 		const app = createApp({
 			mapError: () => {
 				throw new Error("mapError failed");
