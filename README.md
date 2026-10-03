@@ -564,7 +564,8 @@ problemDetailsHandler({
     return { title: `[${lang}] ${pd.title}` };
   },
 
-  // Custom error mapping
+  // Custom error mapping. A throwing callback is silently swallowed
+  // and the error is handled as if mapError returned undefined.
   mapError: (error) => {
     if (error instanceof MyCustomError) {
       return {

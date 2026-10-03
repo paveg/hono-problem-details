@@ -68,7 +68,10 @@ export interface ProblemDetailsHandlerOptions {
 	 * ```
 	 */
 	otelApi?: OtelApiLike;
-	/** Custom error to ProblemDetails mapping */
+	/**
+	 * Custom error to ProblemDetails mapping. A throwing callback is swallowed
+	 * (ADR-0005) and the error is handled as if mapError returned undefined.
+	 */
 	mapError?: (error: Error) => ProblemDetailsInput | undefined;
 	/**
 	 * Localize title/detail before sending the response.
