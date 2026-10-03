@@ -13,8 +13,9 @@ export interface ValidationHookOptions {
 	/**
 	 * Throw a `ProblemDetailsError` instead of returning a Response, so
 	 * `problemDetailsHandler` builds the response and its options (`typePrefix`,
-	 * `defaultType`, `localize`, `autoInstance`, `otelApi`) apply. Requires
-	 * `app.onError(problemDetailsHandler())`. Default: `false`.
+	 * `defaultType`, `localize`, `autoInstance`, `otelApi`) apply. Without
+	 * `app.onError(problemDetailsHandler())`, Hono's default error handler falls back to
+	 * `ProblemDetailsError.getResponse()`, returning the plain 422. Default: `false`.
 	 */
 	delegateToHandler?: boolean;
 }
