@@ -818,7 +818,63 @@ describe("problemDetailsHandler", () => {
 		expect(body.type).toBe("https://api.example.com/problems/conflict");
 	});
 
-	it("H55: preserves WWW-Authenticate from basicAuth on 401", async () => {
+	it("H55: onUnhandledError is called once with the thrown error and context on the generic 500 path", async () => {
+		const onUnhandledError = vi.fn();
+		const app = createApp({ onUnhandledError });
+		const error = new Error("x");
+		app.get("/", () => {
+			throw error;
+		});
+		const res = await app.request("/");
+		expect(onUnhandledError).toHaveBeenCalledTimes(1);
+		const [receivedError, context] = onUnhandledError.mock.calls[0];
+		expect(receivedError).toBe(error);
+		expect(context.req.path).toBe("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.title).toBe("Internal Server Error");
+		expect(body.detail).toBe("An unexpected error occurred");
+	});
+
+	it("H56: onUnhandledError is not called for ProblemDetailsError, HTTPException, or mapError results", async () => {
+		const onUnhandledError = vi.fn();
+		const app = createApp({
+			onUnhandledError,
+			mapError: (error) =>
+				error instanceof RangeError ? { status: 422, title: "Unprocessable" } : undefined,
+		});
+		app.get("/problem", () => {
+			throw problemDetails({ status: 409, title: "Conflict" });
+		});
+		app.get("/http", () => {
+			throw new HTTPException(403, { message: "Forbidden" });
+		});
+		app.get("/mapped", () => {
+			throw new RangeError("boom");
+		});
+		expect((await app.request("/problem")).status).toBe(409);
+		expect((await app.request("/http")).status).toBe(403);
+		expect((await app.request("/mapped")).status).toBe(422);
+		expect(onUnhandledError).not.toHaveBeenCalled();
+	});
+
+	it("H57: a throwing onUnhandledError still yields the normal 500 problem response", async () => {
+		const app = createApp({
+			onUnhandledError: () => {
+				throw new Error("logger down");
+			},
+		});
+		app.get("/", () => {
+			throw new Error("x");
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		const body = await res.json();
+		expect(body.title).toBe("Internal Server Error");
+		expect(body.detail).toBe("An unexpected error occurred");
+	});
+
+	it("H58: preserves WWW-Authenticate from basicAuth on 401", async () => {
 		const app = createApp();
 		app.use(basicAuth({ username: "u", password: "p" }));
 		app.get("/", (c) => c.text("ok"));
@@ -828,7 +884,7 @@ describe("problemDetailsHandler", () => {
 		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
 	});
 
-	it("H56: preserves WWW-Authenticate from bearerAuth on 401", async () => {
+	it("H59: preserves WWW-Authenticate from bearerAuth on 401", async () => {
 		const app = createApp();
 		app.use(bearerAuth({ token: "secret" }));
 		app.get("/", (c) => c.text("ok"));
@@ -838,7 +894,7 @@ describe("problemDetailsHandler", () => {
 		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
 	});
 
-	it("H57: copies res headers but keeps problem+json content type and body", async () => {
+	it("H60: copies res headers but keeps problem+json content type and body", async () => {
 		const app = createApp();
 		app.get("/", () => {
 			throw new HTTPException(429, {
@@ -862,7 +918,7 @@ describe("problemDetailsHandler", () => {
 		expect(res.headers.get("Content-Length")).not.toBe("7");
 	});
 
-	it("H58: preserves multiple Set-Cookie headers from res", async () => {
+	it("H61: preserves multiple Set-Cookie headers from res", async () => {
 		const app = createApp();
 		app.get("/", () => {
 			const headers = new Headers();
@@ -874,7 +930,7 @@ describe("problemDetailsHandler", () => {
 		expect(res.headers.getSetCookie()).toEqual(["a=1", "b=2"]);
 	});
 
-	it("H59: omits detail when HTTPException has no message", async () => {
+	it("H62: omits detail when HTTPException has no message", async () => {
 		const app = createApp();
 		app.get("/", () => {
 			throw new HTTPException(403);
@@ -885,7 +941,7 @@ describe("problemDetailsHandler", () => {
 		expect("detail" in body).toBe(false);
 	});
 
-	it("H60: does not copy headers that describe the original representation", async () => {
+	it("H63: does not copy headers that describe the original representation", async () => {
 		const app = createApp();
 		app.get("/", () => {
 			throw new HTTPException(500, {
@@ -921,7 +977,7 @@ describe("problemDetailsHandler", () => {
 		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
 	});
 
-	it("H61: copies res headers when mapError maps an HTTPException", async () => {
+	it("H64: copies res headers when mapError maps an HTTPException", async () => {
 		const app = createApp({
 			mapError: (e) =>
 				e instanceof HTTPException ? { status: e.status, title: "Mapped" } : undefined,
