@@ -81,15 +81,21 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 		}
 
 		if (error instanceof HTTPException) {
-			return toResponse(
+			const response = toResponse(
 				{
 					status: error.status,
 					title: statusToPhrase(error.status),
-					detail: error.message,
+					detail: error.message || undefined,
 				},
 				c,
 				options,
 			);
+			error.res?.headers.forEach((value, name) => {
+				if (name !== "content-type" && name !== "content-length") {
+					response.headers.append(name, value);
+				}
+			});
+			return response;
 		}
 
 		return toResponse(
