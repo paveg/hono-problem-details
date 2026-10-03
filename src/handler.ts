@@ -74,9 +74,14 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 		}
 
 		if (options.mapError) {
-			const mapped = options.mapError(error);
-			if (mapped) {
-				return toResponse(mapped, c, options);
+			try {
+				const mapped = options.mapError(error);
+				if (mapped) {
+					return toResponse(mapped, c, options);
+				}
+			} catch {
+				// Fall through as if mapError returned undefined. A throwing mapError must not
+				// cause the error handler itself to throw — that would re-enter onError.
 			}
 		}
 
