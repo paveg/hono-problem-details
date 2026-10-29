@@ -174,14 +174,14 @@
 		"@hono/zod-validator": "^0.9.0",
 		"@opentelemetry/api": "^1.0.0",
 		"@standard-schema/spec": "1.1.0",
-		"@vitest/coverage-v8": "^4.1.8",
+		"@vitest/coverage-v8": "^4.1.12",
 		"hono": "^4.13.7",
 		"knip": "6.41.0",
 		"lefthook": "2.2.1",
 		"tsup": "^8.0.0",
 		"typescript": "^6.0.3",
 		"valibot": "^1.3.1",
-		"vitest": "^4.1.8",
+		"vitest": "^4.1.12",
 		"zod": "^4.0.0"
 	},
 	"engines": {
@@ -195,7 +195,7 @@
 			"lefthook"
 		],
 		"overrides": {
-			"vite@<7.3.5": "^7.3.5",
+			"vite@<7.3.7": "^7.3.7",
 			"esbuild@<0.28.1": "^0.28.1",
 			"js-yaml@<4.3.2": "^4.3.2",
 			"yaml@<2.8.3": "^2.8.3",
