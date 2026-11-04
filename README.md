@@ -612,6 +612,12 @@ problemDetailsHandler({
 });
 ```
 
+> **Note on a throw after `await next()`**: the route's response already exists at that point, and
+> Hono copies its headers onto whatever `onError` returns, except `Content-Type`. Behind `compress()`,
+> this can send `Content-Encoding: gzip` on an uncompressed problem body, which clients cannot decode.
+> Any `onError` handler is affected, not only this one. To avoid it, throw before the response is
+> produced, or register `compress()` outside the middleware that throws.
+
 ## Used By
 
 The following Hono middleware libraries use `hono-problem-details` as an optional dependency for RFC 9457 error responses:

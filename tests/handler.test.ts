@@ -1074,4 +1074,48 @@ describe("problemDetailsHandler", () => {
 		expect(await res.text()).toBe("ok");
 		expect(onUnhandledError).not.toHaveBeenCalled();
 	});
+
+	describe("headers copied from HTTPException.res", () => {
+		function requestWithResHeaders(headers: Record<string, string>) {
+			const app = createApp();
+			app.get("/", () => {
+				throw new HTTPException(403, { res: new Response(null, { headers }) });
+			});
+			return app.request("/");
+		}
+
+		it("H70: keeps Content-Security-Policy despite its content- prefix", async () => {
+			const policy = "default-src 'none'";
+			const res = await requestWithResHeaders({
+				"Content-Security-Policy": policy,
+				"Content-Security-Policy-Report-Only": policy,
+			});
+			expect(res.status).toBe(403);
+			expect(res.headers.get("Content-Security-Policy")).toBe(policy);
+			expect(res.headers.get("Content-Security-Policy-Report-Only")).toBe(policy);
+		});
+
+		it("H71: drops representation headers beyond the ones in H63", async () => {
+			const names = [
+				"Content-Language",
+				"Content-Location",
+				"Content-MD5",
+				"Content-Digest",
+				"Repr-Digest",
+			];
+			const res = await requestWithResHeaders(Object.fromEntries(names.map((name) => [name, "v"])));
+			for (const name of names) {
+				expect(res.headers.get(name), name).toBeNull();
+			}
+		});
+
+		it("H72: keeps caching and authentication headers", async () => {
+			const res = await requestWithResHeaders({
+				"Cache-Control": "no-store",
+				"WWW-Authenticate": "Basic",
+			});
+			expect(res.headers.get("Cache-Control")).toBe("no-store");
+			expect(res.headers.get("WWW-Authenticate")).toBe("Basic");
+		});
+	});
 });
