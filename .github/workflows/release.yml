@@ -49,18 +49,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
       - run: pnpm install --frozen-lockfile
-      - uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b  # v1.8.0
+      - uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51  # v2.1.2
         id: changesets
         with:
-          publish: pnpm release
-          version: pnpm version-packages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          publish-script: pnpm release
+          version-script: pnpm version-packages
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set ci-pass status on Version Packages PR
-        if: steps.changesets.outputs.pullRequestNumber
+        if: steps.changesets.outputs.pr-number
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ steps.changesets.outputs.pullRequestNumber }}
+          PR_NUMBER: ${{ steps.changesets.outputs.pr-number }}
         run: |
           sleep 5
           PR_SHA=$(gh pr view "$PR_NUMBER" --json headRefOid -q .headRefOid)
