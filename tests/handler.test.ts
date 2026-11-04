@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type MiddlewareHandler } from "hono";
 import { basicAuth } from "hono/basic-auth";
 import { bearerAuth } from "hono/bearer-auth";
 import { HTTPException } from "hono/http-exception";
@@ -13,6 +13,11 @@ function createApp(options?: Parameters<typeof problemDetailsHandler>[0]) {
 	const app = new Hono();
 	app.onError(problemDetailsHandler(options));
 	return app;
+}
+
+// The dev dependency is Hono 4, whose ErrorHandler type does not admit Hono 5's (c, next) call.
+function asErrorMiddleware(options?: Parameters<typeof problemDetailsHandler>[0]) {
+	return problemDetailsHandler(options) as unknown as MiddlewareHandler;
 }
 
 describe("problemDetailsHandler", () => {
@@ -1027,5 +1032,46 @@ describe("problemDetailsHandler", () => {
 		expect(body.status).toBe(404);
 		expect(body.title).toBe("Not Found");
 		expect(body.detail).toBe("Not Found");
+	});
+
+	it("H67: called as (c, next), responds from c.error (Hono 5 error middleware)", async () => {
+		const handler = asErrorMiddleware();
+		const app = new Hono();
+		app.get("/", (c, next) => {
+			c.error = new HTTPException(503, { message: "Down" });
+			return handler(c, next);
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(503);
+		expect(res.headers.get("Content-Type")).toBe(PROBLEM_JSON_CONTENT_TYPE);
+		const body = await res.json();
+		expect(body.title).toBe("Service Unavailable");
+		expect(body.detail).toBe("Down");
+	});
+
+	it("H68: called as (c, next), onUnhandledError receives c.error, not the context", async () => {
+		const onUnhandledError = vi.fn();
+		const handler = asErrorMiddleware({ onUnhandledError });
+		const thrown = new Error("boom");
+		const app = new Hono();
+		app.get("/", (c, next) => {
+			c.error = thrown;
+			return handler(c, next);
+		});
+		const res = await app.request("/");
+		expect(res.status).toBe(500);
+		expect(onUnhandledError).toHaveBeenCalledOnce();
+		expect(onUnhandledError.mock.calls[0]?.[0]).toBe(thrown);
+	});
+
+	it("H69: called as (c, next) without c.error, defers to next and reports nothing", async () => {
+		const onUnhandledError = vi.fn();
+		const app = new Hono();
+		app.use(asErrorMiddleware({ onUnhandledError, includeStack: true }));
+		app.get("/", (c) => c.text("ok"));
+		const res = await app.request("/");
+		expect(res.status).toBe(200);
+		expect(await res.text()).toBe("ok");
+		expect(onUnhandledError).not.toHaveBeenCalled();
 	});
 });
