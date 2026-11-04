@@ -8,11 +8,22 @@ import { buildProblemResponse, normalizeProblemDetails } from "./utils.js";
 
 // Describe the original response body, which is replaced by the problem JSON.
 const REPRESENTATION_HEADERS = new Set([
-	"transfer-encoding",
+	"content-type",
+	"content-encoding",
+	"content-language",
+	"content-length",
+	"content-location",
+	"content-range",
+	"content-disposition",
+	"content-md5",
+	"content-digest",
+	"content-signature",
+	"repr-digest",
+	"digest",
 	"etag",
 	"last-modified",
-	"digest",
 	"accept-ranges",
+	"transfer-encoding",
 ]);
 
 function buildType(status: number, options: ProblemDetailsHandlerOptions): string {
@@ -26,7 +37,7 @@ function buildType(status: number, options: ProblemDetailsHandlerOptions): strin
 function copyResHeaders(error: Error, response: Response): Response {
 	if (error instanceof HTTPException) {
 		error.res?.headers.forEach((value, name) => {
-			if (!name.startsWith("content-") && !REPRESENTATION_HEADERS.has(name)) {
+			if (!REPRESENTATION_HEADERS.has(name)) {
 				response.headers.append(name, value);
 			}
 		});
