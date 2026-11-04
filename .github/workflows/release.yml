@@ -55,6 +55,8 @@ jobs:
           publish-script: pnpm release
           version-script: pnpm version-packages
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          # The API mode tags GITHUB_SHA, which on workflow_run can be newer than the published head_sha.
+          push-with-git-cli: true
       - name: Set ci-pass status on Version Packages PR
         if: steps.changesets.outputs.pr-number
         env:
