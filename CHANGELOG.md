@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.12.1
+
+### Patch Changes
+
+- [#227](https://github.com/paveg/hono-problem-details/pull/227) [`88acaeb`](https://github.com/paveg/hono-problem-details/commit/88acaeb8ddf25b66470614415216c903cfa4bff6) Thanks [@paveg](https://github.com/paveg)! - `problemDetailsHandler` now works under Hono 5, which calls `onError` as `(c, next)` with the error on `c.error`. Previously every failing request answered `500 text/plain`, and `onUnhandledError` received the context instead of the error. Responses from `app.onError(problemDetailsHandler())` under Hono 4 are unchanged.
+
 ## 0.12.0
 
 ### Minor Changes
