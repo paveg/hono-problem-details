@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.12.2
+
+### Patch Changes
+
+- [#230](https://github.com/paveg/hono-problem-details/pull/230) [`5078393`](https://github.com/paveg/hono-problem-details/commit/5078393689a2e2f7eb356c9c3538e0844d49922f) Thanks [@paveg](https://github.com/paveg)! - `problemDetailsHandler` now filters `HTTPException.res` headers with an explicit list instead of the `content-` prefix. `Content-Security-Policy` and `Content-Security-Policy-Report-Only` are no longer dropped, and other `Content-*` headers outside the list are now kept. `Repr-Digest` is now removed along with the other representation headers.
+
 ## 0.12.1
 
 ### Patch Changes
