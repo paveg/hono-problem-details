@@ -1,4 +1,4 @@
-import type { Context, ErrorHandler } from "hono";
+import type { Context, ErrorHandler, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { ProblemDetailsError } from "./error.js";
 import { getOtelTraceId } from "./integrations/opentelemetry.js";
@@ -87,7 +87,7 @@ function toResponse(
  * ```
  */
 export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}): ErrorHandler {
-	return (error, c) => {
+	const handle = (error: Error, c: Context): Response => {
 		if (error instanceof ProblemDetailsError) {
 			const pd = error.problemDetails;
 			return toResponse(error.hasExplicitType ? pd : { ...pd, type: undefined }, c, options);
@@ -139,4 +139,12 @@ export function problemDetailsHandler(options: ProblemDetailsHandlerOptions = {}
 			options,
 		);
 	};
+
+	// Hono 4 calls onError as (error, c); Hono 5 as (c, next) with the error on c.error (ADR-0006).
+	const dispatch = (first: Error | Context, second: Context | Next) => {
+		if (typeof second !== "function") return handle(first as Error, second);
+		const c = first as Context;
+		return c.error ? handle(c.error, c) : second();
+	};
+	return dispatch as unknown as ErrorHandler;
 }
