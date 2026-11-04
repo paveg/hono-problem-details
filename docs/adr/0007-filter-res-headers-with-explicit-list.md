@@ -33,6 +33,7 @@ uncompressed body.
 | `Content-Disposition` | RFC 6266 |
 | `Transfer-Encoding` | RFC 9112 §6.1 |
 | `Content-MD5` | Obsoleted (RFC 9110 §18.4); stays excluded, as the prefix already excluded it |
+| `Content-Signature` | draft-burke-content-signature, expired; a signature over the replaced body fails verification |
 
 An unknown `Content-*` header now stays. Keeping a header that should have gone is less harmful than
 silently removing a security header, and a new representation header can be added to the list.

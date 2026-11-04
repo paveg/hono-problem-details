@@ -17,6 +17,7 @@ const REPRESENTATION_HEADERS = new Set([
 	"content-disposition",
 	"content-md5",
 	"content-digest",
+	"content-signature",
 	"repr-digest",
 	"digest",
 	"etag",

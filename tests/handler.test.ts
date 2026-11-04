@@ -1101,6 +1101,7 @@ describe("problemDetailsHandler", () => {
 				"Content-Location",
 				"Content-MD5",
 				"Content-Digest",
+				"Content-Signature",
 				"Repr-Digest",
 			];
 			const res = await requestWithResHeaders(Object.fromEntries(names.map((name) => [name, "v"])));
