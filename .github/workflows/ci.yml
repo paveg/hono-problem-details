@@ -41,6 +41,8 @@ jobs:
       - run: pnpm build
       - name: Check published type resolution (attw)
         run: pnpm test:attw
+      - name: Test the built package (CJS and ESM)
+        run: pnpm test:dist
 
   type-compat:
     runs-on: ubuntu-latest
