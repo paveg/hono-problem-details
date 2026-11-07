@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.12.3
+
+### Patch Changes
+
+- [#236](https://github.com/paveg/hono-problem-details/pull/236) [`64f3132`](https://github.com/paveg/hono-problem-details/commit/64f3132b0e09dbb181532acbc07f0561b56df5fd) Thanks [@paveg](https://github.com/paveg)! - Fix the CommonJS build so a validator hook with `delegateToHandler: true` answers `422` instead of `500`. The CJS entry points for `.`, `/zod`, `/valibot`, and `/standard-schema` each carried their own copy of `ProblemDetailsError`, so `problemDetailsHandler` did not recognize errors thrown by the hooks. The CJS entry points now share one copy, as the ESM build already did.
+
 ## 0.12.2
 
 ### Patch Changes
