@@ -10,6 +10,8 @@ export default defineConfig({
 		"integrations/standard-schema": "src/integrations/standard-schema.ts",
 	},
 	format: ["esm", "cjs"],
+	// tsup splits only ESM by default; without this each CJS entry gets its own ProblemDetailsError
+	splitting: true,
 	dts: true,
 	clean: true,
 	sourcemap: false,

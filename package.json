@@ -103,6 +103,7 @@
 		"typecheck": "tsc --noEmit",
 		"test:compat": "tsc -p tsconfig.compat.json",
 		"test:attw": "attw --pack .",
+		"test:dist": "node --test tests/package/",
 		"release": "pnpm build && changeset publish",
 		"version-packages": "changeset version && pnpm lint:fix"
 	},
