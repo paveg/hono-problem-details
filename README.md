@@ -421,6 +421,12 @@ app.post("/users", sValidator("json", schema, standardSchemaProblemHook()), (c) 
 > `zod@^3.25.0` and `zod@^4.0.0` — the version constraint above only applies when you import
 > from `hono-problem-details/openapi`.
 
+> **Keep one copy of `@hono/zod-openapi` and `zod`**: if your install resolves more than one
+> copy (for example, packages in a pnpm monorepo pinning different `zod` versions), `.openapi()`
+> metadata is written to one copy's registry and read from another's. Nothing throws, but
+> `title` and field descriptions are missing from the generated document. This affects every
+> schema, not only the ones from this package. Align the versions so that one copy is installed.
+
 Use with `@hono/zod-openapi` to document Problem Details error responses in your OpenAPI spec:
 
 ```ts
