@@ -1,5 +1,11 @@
 # hono-problem-details
 
+## 0.12.4
+
+### Patch Changes
+
+- [#243](https://github.com/paveg/hono-problem-details/pull/243) [`d8724c5`](https://github.com/paveg/hono-problem-details/commit/d8724c537cf6c29ba6e0c90c651babf49814cd12) Thanks [@paveg](https://github.com/paveg)! - Widen the optional peer ranges for `@hono/zod-validator` (`^0.7.5 || ^0.8.0 || ^0.9.0`) and `@hono/standard-validator` (`^0.2.0 || ^0.3.0 || ^0.4.0`). With the old ranges, a plain `npm install` failed with `ERESOLVE` next to the current `@hono/zod-openapi` (which depends on `@hono/zod-validator@^0.9.1`) or the current `@hono/standard-validator@0.4.1`, so npm users needed `--legacy-peer-deps`. The test suite already runs against `@hono/zod-validator@0.9` and `@hono/standard-validator@0.4.1`.
+
 ## 0.12.3
 
 ### Patch Changes
