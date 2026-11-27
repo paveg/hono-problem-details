@@ -219,8 +219,8 @@ rather than workerd.
 When more than one copy of `@asteasolutions/zod-to-openapi` is installed, each copy
 keeps its own metadata registry. A schema built against one copy and rendered by an
 `OpenAPIHono` that uses another loses the metadata it got from `.openapi()` (`title`,
-`description`, `example`); descriptions set with `.describe()` are kept. Nothing
-throws. In a pnpm monorepo where packages pin different `zod` versions, this happened
+`description`, `example`); descriptions set with `.describe()` are kept. In the tested
+layouts nothing threw. In a pnpm monorepo where packages pin different `zod` versions, this happened
 to this module's schemas on 0.6.1, 0.7.0 and 0.12.3 alike, and also to a control
 schema built in the same package without this module, while the app's own schemas
 kept their metadata. With one `zod` and two `@hono/zod-openapi` versions, the outcome
