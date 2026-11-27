@@ -201,9 +201,10 @@ unpatched instance.
 Fixtures used pnpm and npm installs, pnpm monorepos with diverging `zod` and
 `@hono/zod-openapi` versions, bundles from `wrangler@4.90.0 deploy --dry-run` and
 plain esbuild, a CJS `require()` of the module, mixed CJS/ESM loading, import
-cycles, and esbuild code splitting. Most layouts ran against 0.6.1, 0.7.0 and 0.12.3;
-the monorepo with diverging `@hono/zod-openapi` versions ran against 0.6.1 and 0.12.3
-only. Everything ran in Node rather than workerd.
+cycles, and esbuild code splitting. Every layout ran against 0.6.1 and 0.12.3. 0.7.0
+ran in a subset: a single app, the pnpm monorepo with diverging `zod` versions, and the
+npm-installed bundles with CJS, import cycles and splitting. Everything ran in Node
+rather than workerd.
 
 - No run threw `.openapi is not a function` from this module, including 0.6.1 with
   its module-top-level schema. (With `zod@3.25`, which `./openapi` does not support,
@@ -217,7 +218,8 @@ only. Everything ran in Node rather than workerd.
 
 When more than one copy of `@asteasolutions/zod-to-openapi` is installed, each copy
 keeps its own metadata registry. A schema built against one copy and rendered by an
-`OpenAPIHono` that uses another loses its `title` and field descriptions; nothing
+`OpenAPIHono` that uses another loses the metadata it got from `.openapi()` (`title`,
+`description`, `example`); descriptions set with `.describe()` are kept. Nothing
 throws. In a pnpm monorepo where packages pin different `zod` versions, this happened
 to this module's schemas on 0.6.1, 0.7.0 and 0.12.3 alike, and also to a control
 schema built in the same package without this module, while the app's own schemas
