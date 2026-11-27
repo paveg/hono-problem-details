@@ -178,7 +178,9 @@ describe("zodProblemHook", () => {
 		expect(body.instance).toBe("/users");
 		expect(body.errors).toHaveLength(1);
 		expect(body.errors[0].field).toBe("email");
-		expect(body.errors[0].code).toBe("invalid_format");
+		const expectedCode = z.string().email().safeParse("invalid").error?.issues[0]?.code;
+		expect(expectedCode).toBeTypeOf("string");
+		expect(body.errors[0].code).toBe(expectedCode);
 	});
 
 	it("Z11: delegateToHandler forwards custom title and detail", async () => {

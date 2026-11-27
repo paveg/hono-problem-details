@@ -105,9 +105,35 @@ jobs:
       - run: pnpm build
       - run: pnpm test:compat
 
+  zod-3:
+    runs-on: ubuntu-latest
+    needs: ci
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 22
+      - name: Enable corepack
+        run: corepack enable
+      - name: Resolve pnpm store path
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - run: pnpm install --frozen-lockfile
+      # ./openapi needs zod 4 (@hono/zod-openapi), so only the ./zod suite runs on zod 3.
+      - run: pnpm add -D zod@^3.25.0
+      - run: pnpm vitest run tests/integrations/zod.test.ts
+
   ci-pass:
     runs-on: ubuntu-latest
-    needs: [ci, type-compat, hono-5]
+    needs: [ci, type-compat, hono-5, zod-3]
     if: always()
     steps:
       - run: exit 1
