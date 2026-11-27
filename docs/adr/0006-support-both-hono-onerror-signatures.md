@@ -44,8 +44,8 @@ return dispatch as unknown as ErrorHandler;
 
 **Detect on `typeof second === "function"`.** Only Hono 5's `next` is a function in that position.
 The check imports no runtime value from `hono`, and it does not depend on class identity, which is
-not reliable when a bundle contains more than one copy of a package (issue #133 shows a bundle
-ending up with two zod instances). It also says nothing about `first`, so it holds for whatever a
+not reliable when a bundle contains more than one copy of a package (see ADR-0004's addendum
+for layouts that install two copies). It also says nothing about `first`, so it holds for whatever a
 Hono 4 caller passes as the error.
 
 **Defer to `next()` when `c.error` is unset.** There is no error to report, so a problem response

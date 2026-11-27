@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted
+Accepted. The rationale was re-verified on 2026-11-27 and does not hold; see
+[Addendum: rationale re-verified](#addendum-rationale-re-verified-2026-11-27). The
+decision itself stands.
 
 ## Context
 
@@ -178,3 +180,58 @@ The following tests must land alongside the implementation to prevent recurrence
    public API.
 
 [issue]: https://github.com/paveg/hono-problem-details/issues/133
+
+## Addendum: rationale re-verified (2026-11-27)
+
+The failure mode in Context was never reproduced before v0.7.0 shipped. A later
+re-check could not reproduce it either, and found a reason it cannot occur through
+this module's own calls.
+
+### Why `./openapi` always holds a patched `z`
+
+`@hono/zod-openapi` imports `z` from `zod`, calls `extendZodWithOpenApi(z)`, and
+re-exports that same `z` (`dist/index.mjs` lines 6, 265 and 312 in v1.6.3).
+`./openapi` imports `z` from `@hono/zod-openapi`, so the instance it uses is the one
+that copy of `@hono/zod-openapi` patched while it was evaluated, which completes
+before `./openapi`'s body runs. Duplicating `zod` alone cannot hand this module an
+unpatched instance.
+
+### What was run
+
+Fixtures used pnpm and npm installs, pnpm monorepos with diverging `zod` and
+`@hono/zod-openapi` versions, bundles from `wrangler@4.90.0 deploy --dry-run` and
+plain esbuild, a CJS `require()` of the module, mixed CJS/ESM loading, import
+cycles, and esbuild code splitting. Every layout ran against 0.6.1 and 0.12.3. 0.7.0
+ran in a subset: a single app, the pnpm monorepo with diverging `zod` versions, and the
+npm-installed bundles with CJS, import cycles and splitting. Everything ran in Node
+rather than workerd.
+
+- No run threw `.openapi is not a function` from this module, including 0.6.1 with
+  its module-top-level schema. (With `zod@3.25`, which `./openapi` does not support,
+  0.6.1 threw a different error at load.) Without a failing 0.6.1 run, there is no evidence
+  that deferring construction prevents the reported error.
+- The reported message did appear when consumer code called `.openapi()` on its own
+  `import { z } from "zod"` that resolved to a different, unpatched copy. Whether
+  that is what happened in the issue's Worker is unknown.
+
+### What duplicate copies do cause
+
+When more than one copy of `@asteasolutions/zod-to-openapi` is installed, each copy
+keeps its own metadata registry. A schema built against one copy and rendered by an
+`OpenAPIHono` that uses another loses the metadata it got from `.openapi()` (`title`,
+`description`, `example`); descriptions set with `.describe()` are kept. In the tested
+layouts nothing threw. In a pnpm monorepo where packages pin different `zod` versions, this happened
+to this module's schemas on 0.6.1, 0.7.0 and 0.12.3 alike, and also to a control
+schema built in the same package without this module, while the app's own schemas
+kept their metadata. With one `zod` and two `@hono/zod-openapi` versions, the outcome
+depended on import order. It is a property of which copy a schema is built against,
+not of this module. The README now tells users to keep one copy.
+
+### Effect on this ADR
+
+- The Consequences bullet "The bug is fixed at the root" is not supported.
+- The Negative bullet stating that sharing a registry across bundles "is what caused
+  the original bug" is not supported either; split registries cause missing
+  metadata, not the thrown error.
+- The factory stays. It is harmless, its lazy-evaluation test still describes real
+  behavior, and reverting to a const export would be another breaking change.
