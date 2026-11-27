@@ -1,3 +1,4 @@
+import { zValidator } from "@hono/zod-validator";
 import type {
 	ProblemDetails,
 	ProblemDetailsHandlerOptions,
@@ -28,6 +29,7 @@ import {
 import { standardSchemaProblemHook } from "hono-problem-details/standard-schema";
 import { valibotProblemHook } from "hono-problem-details/valibot";
 import { zodProblemHook } from "hono-problem-details/zod";
+import { z } from "zod";
 
 const _ct: typeof PROBLEM_JSON_CONTENT_TYPE = PROBLEM_JSON_CONTENT_TYPE;
 
@@ -90,6 +92,7 @@ const _phrase: string | undefined = statusToPhrase(404);
 const _slug: string | undefined = statusToSlug(404);
 
 const _zodHook = zodProblemHook({ delegateToHandler: true });
+const _zodValidator = zValidator("json", z.object({ email: z.string() }), zodProblemHook());
 const _valibotHook = valibotProblemHook();
 const _standardHook = standardSchemaProblemHook();
 const _problemSchema = getProblemDetailsSchema();
@@ -117,6 +120,7 @@ void _registryError;
 void _phrase;
 void _slug;
 void _zodHook;
+void _zodValidator;
 void _valibotHook;
 void _standardHook;
 void _problemSchema;
