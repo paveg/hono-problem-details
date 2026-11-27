@@ -1,5 +1,4 @@
 import type { Context } from "hono";
-import type { ZodError } from "zod";
 import {
 	buildValidationResponse,
 	type ValidationError,
@@ -8,7 +7,16 @@ import {
 
 export type { ValidationHookOptions as ZodProblemHookOptions };
 
-function formatErrors(zodError: ZodError): ValidationError[] {
+// zod 4's @hono/zod-validator passes the core `$ZodError`, not the classic `ZodError`.
+type ZodErrorLike = {
+	readonly issues: ReadonlyArray<{
+		readonly path: ReadonlyArray<PropertyKey>;
+		readonly message: string;
+		readonly code?: string;
+	}>;
+};
+
+function formatErrors(zodError: ZodErrorLike): ValidationError[] {
 	return zodError.issues.map((issue) => ({
 		field: issue.path.join("."),
 		message: issue.message,
@@ -23,7 +31,7 @@ function formatErrors(zodError: ZodError): ValidationError[] {
 export function zodProblemHook(
 	options?: ValidationHookOptions,
 ): (
-	result: { success: true; data: unknown } | { success: false; error: ZodError },
+	result: { success: true; data: unknown } | { success: false; error: ZodErrorLike },
 	c: Context,
 ) => Response | undefined {
 	return (result, _c) => {
