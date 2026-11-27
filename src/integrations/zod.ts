@@ -12,7 +12,7 @@ type ZodErrorLike = {
 	readonly issues: ReadonlyArray<{
 		readonly path: ReadonlyArray<PropertyKey>;
 		readonly message: string;
-		readonly code: string;
+		readonly code?: string;
 	}>;
 };
 
