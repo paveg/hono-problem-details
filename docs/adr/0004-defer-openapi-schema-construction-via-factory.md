@@ -201,11 +201,13 @@ unpatched instance.
 Fixtures used pnpm and npm installs, pnpm monorepos with diverging `zod` and
 `@hono/zod-openapi` versions, bundles from `wrangler@4.90.0 deploy --dry-run` and
 plain esbuild, a CJS `require()` of the module, mixed CJS/ESM loading, import
-cycles, and esbuild code splitting. Each ran against 0.6.1, 0.7.0 and 0.12.3, in
-Node rather than workerd.
+cycles, and esbuild code splitting. Most layouts ran against 0.6.1, 0.7.0 and 0.12.3;
+the monorepo with diverging `@hono/zod-openapi` versions ran against 0.6.1 and 0.12.3
+only. Everything ran in Node rather than workerd.
 
 - No run threw `.openapi is not a function` from this module, including 0.6.1 with
-  its module-top-level schema. Without a failing 0.6.1 run, there is no evidence
+  its module-top-level schema. (With `zod@3.25`, which `./openapi` does not support,
+  0.6.1 threw a different error at load.) Without a failing 0.6.1 run, there is no evidence
   that deferring construction prevents the reported error.
 - The reported message did appear when consumer code called `.openapi()` on its own
   `import { z } from "zod"` that resolved to a different, unpatched copy. Whether
@@ -213,13 +215,15 @@ Node rather than workerd.
 
 ### What duplicate copies do cause
 
-When more than one copy of `@asteasolutions/zod-to-openapi` is installed (for
-example, packages in a pnpm monorepo pinning different `zod` versions), `.openapi()`
-writes metadata to the registry of one copy and the generator in the consumer's
-`OpenAPIHono` reads another. Nothing throws; `title` and field descriptions are
-missing from the generated document. This happened on 0.6.1, 0.7.0 and 0.12.3 alike,
-and also to a control schema built without this package, so it is a property of the
-install layout, not of this module. The README now tells users to keep one copy.
+When more than one copy of `@asteasolutions/zod-to-openapi` is installed, each copy
+keeps its own metadata registry. A schema built against one copy and rendered by an
+`OpenAPIHono` that uses another loses its `title` and field descriptions; nothing
+throws. In a pnpm monorepo where packages pin different `zod` versions, this happened
+to this module's schemas on 0.6.1, 0.7.0 and 0.12.3 alike, and also to a control
+schema built in the same package without this module, while the app's own schemas
+kept their metadata. With one `zod` and two `@hono/zod-openapi` versions, the outcome
+depended on import order. It is a property of which copy a schema is built against,
+not of this module. The README now tells users to keep one copy.
 
 ### Effect on this ADR
 
